@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { Header } from '@/components/layout/Header'
+import { Footer } from '@/components/layout/Footer'
 
 export const metadata: Metadata = {
   title: 'ClubCompass - Discover Your Perfect Club at BMSCE',
@@ -21,8 +23,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body>
-        <div className="min-h-screen relative">
-          {children}
+        <div className="min-h-screen relative flex flex-col">
+          <Header />
+          <main className="flex-1 pt-16">
+            {children}
+          </main>
+          <Footer />
         </div>
       </body>
     </html>
