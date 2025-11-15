@@ -1,0 +1,42 @@
+# FastAPI Core
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+
+# Database
+sqlalchemy==2.0.36
+alembic==1.14.0
+psycopg2-binary==2.9.10
+asyncpg==0.30.0
+
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-dotenv==1.0.1
+bcrypt==4.2.1
+
+# Validation
+pydantic==2.10.6
+pydantic-settings==2.7.1
+email-validator==2.2.0
+
+# Redis & Caching
+redis==5.2.1
+hiredis==3.1.0
+
+# HTTP Client
+httpx==0.28.2
+
+# CORS
+python-multipart==0.0.20
+
+# Testing
+pytest==8.3.5
+pytest-asyncio==0.25.3
+pytest-cov==6.0.0
+
+# Development
+black==24.11.0
+isort==6.1.0
+flake8==7.1.1
+mypy==1.14.3
