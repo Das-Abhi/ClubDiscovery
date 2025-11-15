@@ -1,15 +1,27 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
-import { Search, Menu, X, Compass } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { Search, Menu, X, Compass, User, LogOut } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/lib/hooks/useAuth'
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const router = useRouter()
+  const { user, isAuthenticated, logout, loadUser } = useAuth()
+
+  // Load user on mount
+  useEffect(() => {
+    if (!user && !isAuthenticated) {
+      loadUser()
+    }
+  }, [user, isAuthenticated, loadUser])
 
   const navigationLinks = [
     { href: '/', label: 'Home' },
@@ -25,6 +37,12 @@ export function Header() {
       // Navigate to search results
       window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`
     }
+  }
+
+  const handleLogout = () => {
+    logout()
+    setIsProfileOpen(false)
+    router.push('/')
   }
 
   return (
@@ -67,21 +85,77 @@ export function Header() {
             />
           </form>
 
-          {/* Auth Buttons (Desktop) */}
+          {/* Auth Section (Desktop) */}
           <div className="hidden lg:flex items-center gap-3">
-            <Link href="/auth/login">
-              <Button variant="ghost" size="sm">
-                Login
-              </Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button
-                size="sm"
-                className="bg-gradient-to-r from-red-900 to-red-700 hover:from-red-800 hover:to-red-600"
-              >
-                Sign Up
-              </Button>
-            </Link>
+            {isAuthenticated && user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="flex items-center gap-2 glass-card px-3 py-2 rounded-lg hover:bg-white/10 transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center text-sm font-bold text-white">
+                    {user.full_name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')
+                      .toUpperCase()
+                      .slice(0, 2)}
+                  </div>
+                  <span className="text-sm font-medium text-white">
+                    {user.full_name.split(' ')[0]}
+                  </span>
+                </button>
+
+                {/* Profile Dropdown */}
+                {isProfileOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setIsProfileOpen(false)}
+                    />
+                    <div className="absolute right-0 mt-2 w-56 glass-card rounded-lg shadow-lg py-2 z-50">
+                      <div className="px-4 py-3 border-b border-white/10">
+                        <p className="text-sm font-medium text-white">
+                          {user.full_name}
+                        </p>
+                        <p className="text-xs text-gray-400">{user.email}</p>
+                      </div>
+                      <Link
+                        href="/profile"
+                        onClick={() => setIsProfileOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
+                      >
+                        <User className="w-4 h-4" />
+                        My Profile
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-white/5 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Logout
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <>
+                <Link href="/auth">
+                  <Button variant="ghost" size="sm">
+                    Login
+                  </Button>
+                </Link>
+                <Link href="/auth">
+                  <Button
+                    size="sm"
+                    className="bg-gradient-to-r from-red-900 to-red-700 hover:from-red-800 hover:to-red-600"
+                  >
+                    Sign Up
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -133,20 +207,59 @@ export function Header() {
               ))}
             </nav>
 
-            {/* Mobile Auth Buttons */}
-            <div className="flex gap-3 pt-2 border-t border-red-900/20">
-              <Link href="/auth/login" className="flex-1">
-                <Button variant="ghost" className="w-full">
-                  Login
-                </Button>
-              </Link>
-              <Link href="/auth/signup" className="flex-1">
-                <Button
-                  className="w-full bg-gradient-to-r from-red-900 to-red-700 hover:from-red-800 hover:to-red-600"
-                >
-                  Sign Up
-                </Button>
-              </Link>
+            {/* Mobile Auth Section */}
+            <div className="pt-2 border-t border-red-900/20">
+              {isAuthenticated && user ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3 px-3 py-2 glass-card rounded-lg">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center text-sm font-bold text-white">
+                      {user.full_name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .toUpperCase()
+                        .slice(0, 2)}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-white">
+                        {user.full_name}
+                      </p>
+                      <p className="text-xs text-gray-400">{user.email}</p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/profile"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                  >
+                    <User className="w-4 h-4" />
+                    My Profile
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleLogout()
+                      setIsMenuOpen(false)
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-white/5 rounded-lg transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-3">
+                  <Link href="/auth" className="flex-1">
+                    <Button variant="ghost" className="w-full">
+                      Login
+                    </Button>
+                  </Link>
+                  <Link href="/auth" className="flex-1">
+                    <Button className="w-full bg-gradient-to-r from-red-900 to-red-700 hover:from-red-800 hover:to-red-600">
+                      Sign Up
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
