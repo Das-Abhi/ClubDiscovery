@@ -10,6 +10,14 @@ from app.schemas.user import (
     TokenResponse,
     TokenRefresh,
 )
+from app.schemas.assessment import (
+    AssessmentResponses,
+    AssessmentCreate,
+    AssessmentResponse,
+    AssessmentResult,
+    ClubRecommendation,
+    ReasoningItem,
+)
 
 __all__ = [
     "UserBase",
@@ -19,4 +27,10 @@ __all__ = [
     "UserUpdate",
     "TokenResponse",
     "TokenRefresh",
+    "AssessmentResponses",
+    "AssessmentCreate",
+    "AssessmentResponse",
+    "AssessmentResult",
+    "ClubRecommendation",
+    "ReasoningItem",
 ]

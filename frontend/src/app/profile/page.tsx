@@ -3,17 +3,43 @@
  */
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+import Link from 'next/link'
 import { AuthGuard } from '@/components/auth/AuthGuard'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { ClipboardList, Calendar } from 'lucide-react'
+import { assessmentApi } from '@/lib/api/assessment'
+import type { Assessment } from '@/lib/types/assessment'
 
 function ProfileContent() {
   const router = useRouter()
   const { user, logout, isLoading } = useAuth()
+  const [assessments, setAssessments] = useState<Assessment[]>([])
+  const [loadingAssessments, setLoadingAssessments] = useState(false)
+
+  useEffect(() => {
+    if (user) {
+      loadAssessments()
+    }
+  }, [user])
+
+  const loadAssessments = async () => {
+    if (!user) return
+
+    setLoadingAssessments(true)
+    try {
+      const data = await assessmentApi.getUserAssessments(user.id)
+      setAssessments(data)
+    } catch (error) {
+      console.error('Failed to load assessments:', error)
+    } finally {
+      setLoadingAssessments(false)
+    }
+  }
 
   const handleLogout = () => {
     logout()
@@ -122,6 +148,72 @@ function ProfileContent() {
                 Logout
               </Button>
             </div>
+          </Card>
+
+          {/* Assessment History Section */}
+          <Card className="glass-card p-8 mb-8">
+            <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+              <ClipboardList className="w-6 h-6" />
+              Assessment History
+            </h2>
+
+            {loadingAssessments ? (
+              <div className="text-center py-12">
+                <div className="w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                <p className="text-gray-400">Loading assessments...</p>
+              </div>
+            ) : assessments.length > 0 ? (
+              <div className="space-y-3">
+                {assessments.map((assessment) => (
+                  <div
+                    key={assessment.id}
+                    className="p-4 rounded-lg border border-white/10 hover:border-red-500/50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                          <ClipboardList className="w-5 h-5 text-red-500" />
+                        </div>
+                        <div>
+                          <p className="text-white font-medium">
+                            Assessment Results
+                          </p>
+                          <p className="text-sm text-gray-400 flex items-center gap-2">
+                            <Calendar className="w-3 h-3" />
+                            {new Date(assessment.created_at).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                      <Link href={`/assessment?id=${assessment.id}`}>
+                        <Button variant="outline" size="sm">
+                          View Results
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-gray-400 text-center py-12">
+                <ClipboardList className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                <p className="text-lg mb-2">No assessments yet</p>
+                <p className="text-sm mb-4">
+                  Take an assessment to get personalized club recommendations
+                </p>
+                <Button
+                  onClick={() => router.push('/assessment')}
+                  variant="glass"
+                >
+                  Take Assessment
+                </Button>
+              </div>
+            )}
           </Card>
 
           {/* Club Memberships Section */}
