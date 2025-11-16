@@ -1,0 +1,395 @@
+{
+  "categories": [
+    {
+      "category": "Co-Curricular",
+      "clubs": [
+        {
+          "id": "acm",
+          "name": "ACM (BMSCE ACM Student Chapter)",
+          "tagline": "ACM student chapter — computing & AI",
+          "overview": "Established in 2021, the BMSCE ACM student chapter focuses on AI and ML concepts. It provides a platform for networking and collaboration among students and professionals, offering international perspectives in computer science.",
+          "image-url": "images/acm.jpg"
+        },
+        {
+          "id": "aquila",
+          "name": "Aquila Aerospace",
+          "tagline": "Aeromodelling & aerospace",
+          "overview": "Aquila Aerospace is the student club of the department of aerospace engineering. It conducts technical and non-technical events for students and aerospace enthusiasts, encouraging the spirit of elevate, lift, fly.",
+          "image-url": "images/Aquila.jpg"
+        },
+        {
+          "id": "augmentai",
+          "name": "Augment.AI",
+          "tagline": "AI / ML student group",
+          "overview": "The artificial intelligence club initiated by the ISE department. It spreads awareness on AI and ML through events, workshops, and accelerator programs, conducted quarterly.",
+          "image-url": "images/AugmentAI.jpg"
+        },
+        {
+          "id": "aero",
+          "name": "AeroBMSCE",
+          "tagline": "Aeromodelling & drones",
+          "overview": "AeroBMSCE, the Aeromodelling Club of BMSCE, is a vibrant community for aircraft and drone enthusiasts. The club participates in national and international aero-design competitions and offers a platform to learn, build and fly.",
+          "image-url": "images/aero.JPG"
+        },
+        {
+          "id": "robotics",
+          "name": "Robotics Club",
+          "tagline": "Robotics innovation",
+          "overview": "Focused on learning and innovation in robotics. Members design and program robotic systems, gaining hands-on experience while exploring creativity and engineering problem-solving.",
+          "image-url": "images/robotics.JPG"
+        },
+        {
+          "id": "rocketry",
+          "name": "Rocketry",
+          "tagline": "Model rocketry",
+          "overview": "Rocketry is the model rocket club of BMSCE where students collaborate to design and work with rockets. The club provides a launchpad for project-based learning and rocket challenges, encouraging teamwork and exploration in rocket science.",
+          "image-url": "images/Rocketry.JPG"
+        },
+        {
+          "id": "bullz",
+          "name": "Bullz Racing (SAE)",
+          "tagline": "Formula student / motorsport",
+          "overview": "The formula student team of BMSCE, designing and building formula-style race cars and competing in national-level motorsport competitions.",
+          "image-url": "images/bullz.jpg"
+        },
+        {
+          "id": "teamcodelocked",
+          "name": "TeamCodeLocked",
+          "tagline": "Coding & competitive programming",
+          "overview": "TeamCodeLocked is the premier coding club of BMSCE, open to students from all branches; it focuses on coding proficiency via competitions, collaboration and workshops.",
+          "image-url": "images/teamcodelocked.JPG"
+        },
+        {
+          "id": "dsync",
+          "name": "DSYNC (Data Science)",
+          "tagline": "Data science & analytics",
+          "overview": "The first data science club at BMSCE aimed at building strong coding, analytical, and collaborative skills among data science enthusiasts.",
+          "image-url": "images/Dsync.jpg"
+        },
+        {
+          "id": "varaince",
+          "name": "Varaince (AI & Data Science)",
+          "tagline": "AI & data science community",
+          "overview": "A community centered around artificial intelligence and data science that runs seminars, hands-on sessions, hackathons and mentorship for aspiring AI/DS professionals.",
+          "image-url": "images/varaince.JPG"
+        },
+        {
+          "id": "corrtechs",
+          "name": "CORTECHS",
+          "tagline": "MedTech & healthcare innovation",
+          "overview": "CORTECHS (formerly AME) unites students passionate about MedTech and healthcare technology to reimagine healthcare solutions, empowering innovation across electronics, AI and healthcare.",
+          "image-url": "images/corrtechs.jpg"
+        },
+        {
+          "id": "ciie",
+          "name": "CIIE (Centre for Innovation, Incubation & Entrepreneurship)",
+          "tagline": "Entrepreneurship & startups",
+          "overview": "CIIE supports student entrepreneurship, incubation & startup workshops and activities.",
+          "image-url": "images/ciie.jpg"
+        },
+        {
+          "id": "iic",
+          "name": "IIC BMSCE (Startup Cell)",
+          "tagline": "Startup support & incubation",
+          "overview": "Institute Innovation Council / Startup Cell facilitating new ventures, events, and incubation activities.",
+          "image-url": "images/iic.jpg"
+        },
+        {
+          "id": "edc",
+          "name": "EDC - Entrepreneur Development Cell",
+          "tagline": "Entrepreneur development",
+          "overview": "EDC organises entrepreneurship development programs and workshops to build entrepreneurial skills.",
+          "image-url": "images/edc.jpg"
+        },
+        {
+          "id": "business-insights",
+          "name": "Business Insights",
+          "tagline": "Business & finance club",
+          "overview": "The business club of BMSCE aimed at inspiring entrepreneurship and managerial thinking through workshops, networking, and finance sessions.",
+          "image-url": "images/business-insights.JPG"
+        },
+        {
+          "id": "pentagram",
+          "name": "Pentagram (Mathematics Society)",
+          "tagline": "Mathematics & problem solving",
+          "overview": "The Mathematical Society promoting curiosity in mathematics via competitions, discussions and collaborative learning.",
+          "image-url": "images/Pentagram.JPG"
+        },
+        {
+          "id": "mea",
+          "name": "Mechanical Engineering Association (MEA)",
+          "tagline": "Mechanical engineering community",
+          "overview": "Club for mechanical engineering students conducting technical seminars, workshops and the departmental fest 'Dynamech' with an industry-orientated focus.",
+          "image-url": "images/mea.JPG"
+        },
+        {
+          "id": "elsoc",
+          "name": "ELSOC (Electronics Society)",
+          "tagline": "Electronics & VLSI community",
+          "overview": "ELSOC runs electronics workshops, project support and student activities focused on VLSI, robotics and related fields.",
+          "image-url": "images/ElSoc.jpg"
+        },
+        {
+          "id": "ieee-cs",
+          "name": "BMSCE IEEE Computer Society",
+          "tagline": "IEEE Computer Society",
+          "overview": "Supports development in computer science research and technology through workshops, seminars, hackathons, and networking.",
+          "image-url": "images/ieee-cs.jpg"
+        },
+        {
+          "id": "ieee-sb",
+          "name": "BMSCE IEEE Student Branch",
+          "tagline": "IEEE student branch",
+          "overview": "Founded in 2009, the student branch organises technical activities to keep students updated with evolving technology.",
+          "image-url": "images/ieee-sb.jpg"
+        },
+        {
+          "id": "ieee-wie",
+          "name": "BMSCE IEEE WIE",
+          "tagline": "Women in Engineering",
+          "overview": "Women in Engineering chapter promoting equality in STEM and professional skill development among women students.",
+          "image-url": "images/ieee-wie.jpg"
+        },
+        {
+          "id": "ieee-pes",
+          "name": "IEEE PES & Sensors Council",
+          "tagline": "Power & sensors community",
+          "overview": "Focuses on power systems, sustainability and energy technologies through workshops and training.",
+          "image-url": "images/ieee-pes.jpg"
+        },
+        {
+          "id": "ieee-sps",
+          "name": "IEEE Signal Processing Society",
+          "tagline": "Signal processing research",
+          "overview": "Dedicated to signal processing theory and applications; organises conferences, workshops and knowledge sharing.",
+          "image-url": "images/ieee-sps.JPG"
+        },
+        {
+          "id": "gdscl",
+          "name": "GDSC (Google Developer Student Club)",
+          "tagline": "Developer community",
+          "overview": "A student-driven group promoting hands-on projects, workshops and innovation-focused activities.",
+          "image-url": "images/gdscl.jpg"
+        },
+        {
+          "id": "synapse",
+          "name": "Synapse (Biotech)",
+          "tagline": "Biotechnology students' association",
+          "overview": "The biotechnology students' association supporting academic growth through workshops, quizzes and hands-on training for young scientists.",
+          "image-url": "images/synapse.JPG"
+        },
+        {
+          "id": "upagraha",
+          "name": "Upagraha",
+          "tagline": "Student satellite initiative",
+          "overview": "A student-driven satellite development initiative (with industry partners) involved in designing and launching a nanosatellite into low earth orbit.",
+          "image-url": "images/upagraha.JPG"
+        }
+      ]
+    },
+    {
+      "category": "Department",
+      "clubs": [
+        {
+          "id": "codeio",
+          "name": "<CodeIO/>",
+          "tagline": "CSE technical community",
+          "overview": "A technical community in the CSE department focused on technical upskilling through hackathons, workshops, coding sessions, R&D activities and development projects such as web applications.",
+          "image-url": "images/CodeIO.jpg"
+        },
+        {
+          "id": "protocol",
+          "name": "PROTOCOL",
+          "tagline": "CSE departmental club",
+          "overview": "The CSE departmental club focused on technical skill development. It conducts workshops, talks, competitions, and Protocol Day to enhance problem-solving and conceptual understanding in computer science.",
+          "image-url": "images/protocol.JPG"
+        },
+        {
+          "id": "aquila",
+          "name": "Aquila",
+          "tagline": "Aeromodelling & aerospace",
+          "overview": "Aquila Aerospace is the student club of the department of aerospace engineering. It conducts technical and non-technical events for students and aerospace enthusiasts, encouraging the spirit of elevate, lift, fly.",
+          "image-url": "images/Aquila.jpg"
+        },
+        {
+          "id": "dsync",
+          "name": "DSync",
+          "tagline": "Data science & analytics",
+          "overview": "The first data science club at BMSCE aimed at building strong coding, analytical and collaborative skills among data science enthusiasts.",
+          "image-url": "images/Dsync.jpg"
+        },
+        {
+          "id": "elsoc",
+          "name": "ELSOC",
+          "tagline": "Electronics & VLSI community",
+          "overview": "The student community of the ECE department conducting workshops and events to inspire innovation in VLSI, robotics, AI and other advanced technology domains.",
+          "image-url": "images/ElSoc.jpg"
+        },
+        {
+          "id": "iseclub",
+          "name": "ISE STUDENT CLUB",
+          "tagline": "ISE student community",
+          "overview": "A collaborative student-run club promoting holistic development, peer learning and community-building activities in the ISE department.",
+          "image-url": "images/iseclub.jpg"
+        },
+        {
+          "id": "synapse",
+          "name": "Synapse",
+          "tagline": "Biotech students' association",
+          "overview": "The first biotechnology students' association supporting academic and career growth through workshops, quizzes, themed events, hands-on training and community building among young scientists and innovators.",
+          "image-url": "images/synapse.JPG"
+        },
+        {
+          "id": "eeea",
+          "name": "EEE Association",
+          "tagline": "Electrical & Electronics community",
+          "overview": "A community for students interested in electrical and electronics engineering, organizing workshops, seminars and industrial visits to strengthen learning and innovation.",
+          "image-url": "images/eeea.jpg"
+        },
+        {
+          "id": "varaince",
+          "name": "VarAInce",
+          "tagline": "AI & Data Science community",
+          "overview": "A community centered around artificial intelligence and data science that runs seminars, hands-on sessions, hackathons and mentorship for aspiring AI/DS professionals.",
+          "image-url": "images/varaince.JPG"
+        },
+        {
+          "id": "gradient",
+          "name": "Gradient",
+          "tagline": "AI/ML / AIML club",
+          "overview": "The AIML club of BMSCE providing real-world project exposure and skill-building in artificial intelligence and application-based learning.",
+          "image-url": "images/Gradient.jpg"
+        }
+      ]
+    },
+    {
+      "category": "Extra-Curricular - Social",
+      "clubs": [
+        {
+          "id": "nss",
+          "name": "National Service Scheme (NSS)",
+          "tagline": "Social outreach & service",
+          "overview": "The NSS unit encourages social responsibility and community service. Members engage in welfare initiatives and volunteering activities, developing empathy, leadership, and teamwork.",
+          "image-url": "images/nss.JPG"
+        },
+        {
+          "id": "rotaract",
+          "name": "Rotaract Club of BMSCE",
+          "tagline": "Leadership & Community Service",
+          "overview": "The Rotaract club of BMSCE is focused on community service, professional development and international service; members engage in impactful activities that build leadership and contribute to positive change.",
+          "image-url": "images/rotaract.JPG"
+        },
+        {
+          "id": "leosatva",
+          "name": "Leo Satva",
+          "tagline": "Leadership & service (Lions-affiliated)",
+          "overview": "Affiliated with Lions Clubs International, promoting leadership, service and community engagement through volunteer projects.",
+          "image-url": "images/leosatva.JPG"
+        },
+        {
+          "id": "mountaineering",
+          "name": "Mountaineering Club",
+          "tagline": "Outdoors & trekking",
+          "overview": "The Mountaineering Club promotes wall climbing, slacklining, bouldering, rappelling and hiking, organizing climbing trips and sustainable treks for beginners and experienced climbers.",
+          "image-url": "images/mountaineering.JPG"
+        },
+        {
+          "id": "respawn",
+          "name": "Respawn (Gaming Club)",
+          "tagline": "Competitive & social gaming",
+          "overview": "The official gaming club hosting tournaments for popular competitive titles and providing a space for social and competitive gaming.",
+          "image-url": "images/Respawn.JPG"
+        }
+      ]
+    },
+    {
+      "category": "Extra-Curricular - Cultural",
+      "clubs": [
+        {
+          "id": "inksanity",
+          "name": "Inksanity – Literary & Debate Society",
+          "tagline": "Literary & Debate",
+          "overview": "The literary and debate society providing a platform for writing, debating, discussion, and creative expression.",
+          "image-url": "images/Inksanity.jpg"
+        },
+        {
+          "id": "ninaad",
+          "name": "Ninaad (Eastern Music)",
+          "tagline": "Music & performance",
+          "overview": "The Eastern music club promoting Carnatic, Hindustani, light, folk and film music; a space to learn, jam and perform.",
+          "image-url": "images/ninaad.JPG"
+        },
+        {
+          "id": "groovehouse",
+          "name": "The Groovehouse",
+          "tagline": "Music & live performance",
+          "overview": "The music club hosting live performances, competitions and music-based cultural activities to foster a vibrant musical community.",
+          "image-url": "images/GrooveHouse.jpg"
+        },
+        {
+          "id": "panache",
+          "name": "Panache – Fashion Team",
+          "tagline": "Fashion & styling",
+          "overview": "The official fashion club of BMSCE hosting fashion shows, styling workshops and competitions for models, designers and makeup artists.",
+          "image-url": "images/panache.JPG"
+        },
+        {
+          "id": "paramvah",
+          "name": "Paramvah Dance (Eastern)",
+          "tagline": "Indian dance & choreography",
+          "overview": "College dance team specializing in Eastern and Indian contemporary dance forms, creating expressive performances that celebrate cultural heritage.",
+          "image-url": "images/paramvah.JPG"
+        },
+        {
+          "id": "danzaddix",
+          "name": "Danz Addix (Western Dance)",
+          "tagline": "Western dance team",
+          "overview": "The western dance team performing hip-hop and contemporary styles, participating in events and competitions.",
+          "image-url": "images/DanzAddix.jpg"
+        },
+        {
+          "id": "finearts",
+          "name": "Fine Arts Club",
+          "tagline": "Visual arts & painting",
+          "overview": "A platform for creativity involving drawing, sketching, mehendi, wall painting and other artistic expressions for all skill levels.",
+          "image-url": "images/finearts.jpg"
+        },
+        {
+          "id": "falcons",
+          "name": "Falcons (Multimedia)",
+          "tagline": "Photography & multimedia",
+          "overview": "The multimedia club comprising photographers, videographers, editors and drone operators who capture and document major college events.",
+          "image-url": "images/Falcons.jpg"
+        },
+        {
+          "id": "pravrutthi",
+          "name": "Pravrutthi (Theatre)",
+          "tagline": "Theatre & street performance",
+          "overview": "The theatre team involved in acting, scriptwriting, stage plays and street performances nurturing creativity and expressive storytelling.",
+          "image-url": "images/Pravrutthi.JPG"
+        },
+        {
+          "id": "chiranthana",
+          "name": "Chiranthana (Kannada Sangha)",
+          "tagline": "Kannada language & culture",
+          "overview": "The Kannada cultural club promoting Kannada language, literature and art with performances and cultural showcases.",
+          "image-url": "images/chiranthana.jpg"
+        },
+        {
+          "id": "samskruthi",
+          "name": "Samskruthi Sambhrama",
+          "tagline": "Folklore & cultural festival",
+          "overview": "The folklore society dedicated to celebrating Indian culture and heritage through diverse cultural art forms and performances.",
+          "image-url": "images/samskruthi.JPG"
+        },
+        {
+          "id": "munsoc",
+          "name": "BMS MUNSOC (Model UN)",
+          "tagline": "Model UN & diplomacy",
+          "overview": "A platform for developing public policy awareness, diplomacy and oratory skills; members discuss, deliberate and resolve global issues.",
+          "image-url": "images/munsoc.JPG"
+        }
+      ]
+    }
+  ]
+}
