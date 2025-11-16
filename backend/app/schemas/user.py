@@ -3,7 +3,8 @@ User Pydantic schemas for request/response validation
 """
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from uuid import UUID
+from pydantic import BaseModel, EmailStr, Field, field_validator, field_serializer
 
 
 class UserBase(BaseModel):
@@ -57,6 +58,11 @@ class UserResponse(UserBase):
     email_verified: bool
     is_active: bool
     is_admin: bool
+
+    @field_serializer('id')
+    def serialize_id(self, value: UUID, _info) -> str:
+        """Convert UUID to string for JSON serialization"""
+        return str(value)
 
     class Config:
         from_attributes = True

@@ -3,7 +3,8 @@ Assessment Pydantic schemas for request/response validation
 """
 from datetime import datetime
 from typing import Optional, Dict, Any, List
-from pydantic import BaseModel, Field
+from uuid import UUID
+from pydantic import BaseModel, Field, field_serializer
 
 
 class AssessmentResponses(BaseModel):
@@ -58,6 +59,11 @@ class AssessmentResponse(BaseModel):
     user_id: Optional[str]
     responses: AssessmentResponses
     created_at: datetime
+
+    @field_serializer('id', 'user_id')
+    def serialize_uuids(self, value: Optional[UUID], _info) -> Optional[str]:
+        """Convert UUID fields to strings for JSON serialization"""
+        return str(value) if value is not None else None
 
     class Config:
         from_attributes = True

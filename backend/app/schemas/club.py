@@ -3,7 +3,8 @@ Club Pydantic schemas for request/response validation
 """
 from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel, Field, field_validator
+from uuid import UUID
+from pydantic import BaseModel, Field, field_validator, field_serializer
 
 
 class ClubBase(BaseModel):
@@ -70,6 +71,11 @@ class ClubResponse(ClubBase):
     updated_at: datetime
     is_active: bool
 
+    @field_serializer('id')
+    def serialize_id(self, value: UUID, _info) -> str:
+        """Convert UUID to string for JSON serialization"""
+        return str(value)
+
     class Config:
         from_attributes = True
 
@@ -106,6 +112,11 @@ class MembershipResponse(MembershipBase):
     joined_at: datetime
     updated_at: datetime
     club: Optional[ClubResponse] = None
+
+    @field_serializer('id', 'user_id', 'club_id')
+    def serialize_uuids(self, value: UUID, _info) -> str:
+        """Convert UUID fields to strings for JSON serialization"""
+        return str(value)
 
     class Config:
         from_attributes = True
