@@ -30,7 +30,9 @@ export const sampleClubs: Club[] = [
     created_at: '2024-01-15T10:30:00Z',
     updated_at: '2024-01-15T10:30:00Z',
     is_active: true,
+    is_featured: false,
     member_count: 150,
+    view_count: 320,
   },
   {
     id: '2',
@@ -55,7 +57,9 @@ export const sampleClubs: Club[] = [
     created_at: '2024-01-10T10:30:00Z',
     updated_at: '2024-01-10T10:30:00Z',
     is_active: true,
+    is_featured: true,
     member_count: 200,
+    view_count: 450,
   },
   {
     id: '3',
@@ -74,7 +78,9 @@ export const sampleClubs: Club[] = [
     created_at: '2024-01-05T10:30:00Z',
     updated_at: '2024-01-05T10:30:00Z',
     is_active: true,
+    is_featured: true,
     member_count: 180,
+    view_count: 380,
   },
   {
     id: '4',
@@ -92,7 +98,9 @@ export const sampleClubs: Club[] = [
     created_at: '2024-01-20T10:30:00Z',
     updated_at: '2024-01-20T10:30:00Z',
     is_active: true,
+    is_featured: false,
     member_count: 120,
+    view_count: 250,
   },
   {
     id: '5',
@@ -106,7 +114,9 @@ export const sampleClubs: Club[] = [
     created_at: '2024-02-01T10:30:00Z',
     updated_at: '2024-02-01T10:30:00Z',
     is_active: true,
+    is_featured: false,
     member_count: 95,
+    view_count: 180,
   },
 
   // Extra-curricular Clubs
@@ -133,7 +143,9 @@ export const sampleClubs: Club[] = [
     created_at: '2024-01-12T10:30:00Z',
     updated_at: '2024-01-12T10:30:00Z',
     is_active: true,
+    is_featured: false,
     member_count: 120,
+    view_count: 240,
   },
   {
     id: '7',
@@ -148,7 +160,9 @@ export const sampleClubs: Club[] = [
     created_at: '2024-01-08T10:30:00Z',
     updated_at: '2024-01-08T10:30:00Z',
     is_active: true,
+    is_featured: false,
     member_count: 90,
+    view_count: 160,
   },
   {
     id: '8',
@@ -162,7 +176,9 @@ export const sampleClubs: Club[] = [
     created_at: '2024-01-18T10:30:00Z',
     updated_at: '2024-01-18T10:30:00Z',
     is_active: true,
+    is_featured: false,
     member_count: 75,
+    view_count: 140,
   },
   {
     id: '9',
@@ -176,7 +192,9 @@ export const sampleClubs: Club[] = [
     created_at: '2024-02-05T10:30:00Z',
     updated_at: '2024-02-05T10:30:00Z',
     is_active: true,
+    is_featured: false,
     member_count: 60,
+    view_count: 110,
   },
   {
     id: '10',
@@ -190,7 +208,9 @@ export const sampleClubs: Club[] = [
     created_at: '2024-01-25T10:30:00Z',
     updated_at: '2024-01-25T10:30:00Z',
     is_active: true,
+    is_featured: false,
     member_count: 85,
+    view_count: 150,
   },
 
   // Department Clubs
@@ -211,7 +231,9 @@ export const sampleClubs: Club[] = [
     created_at: '2024-01-03T10:30:00Z',
     updated_at: '2024-01-03T10:30:00Z',
     is_active: true,
+    is_featured: true,
     member_count: 250,
+    view_count: 520,
   },
   {
     id: '12',
@@ -225,7 +247,9 @@ export const sampleClubs: Club[] = [
     created_at: '2024-01-06T10:30:00Z',
     updated_at: '2024-01-06T10:30:00Z',
     is_active: true,
+    is_featured: true,
     member_count: 220,
+    view_count: 480,
   },
   {
     id: '13',
@@ -239,7 +263,9 @@ export const sampleClubs: Club[] = [
     created_at: '2024-01-14T10:30:00Z',
     updated_at: '2024-01-14T10:30:00Z',
     is_active: true,
+    is_featured: false,
     member_count: 200,
+    view_count: 410,
   },
   {
     id: '14',
@@ -253,7 +279,9 @@ export const sampleClubs: Club[] = [
     created_at: '2024-01-22T10:30:00Z',
     updated_at: '2024-01-22T10:30:00Z',
     is_active: true,
+    is_featured: false,
     member_count: 180,
+    view_count: 360,
   },
   {
     id: '15',
@@ -267,7 +295,9 @@ export const sampleClubs: Club[] = [
     created_at: '2024-02-02T10:30:00Z',
     updated_at: '2024-02-02T10:30:00Z',
     is_active: true,
+    is_featured: true,
     member_count: 230,
+    view_count: 500,
   },
 ]
 

@@ -15,13 +15,22 @@ export interface Club {
   description?: string
   overview?: string
   logo_url?: string
+  cover_image_url?: string
   instagram?: string
+  linkedin?: string
+  twitter?: string
+  website?: string
+  faculty_name?: string
+  faculty_email?: string
+  faculty_phone?: string
   faculty_contact?: Contact
   student_contacts?: Contact[]
+  member_count: number
+  view_count: number
   created_at: string
   updated_at: string
   is_active: boolean
-  member_count?: number
+  is_featured: boolean
 }
 
 export interface ClubsResponse {
