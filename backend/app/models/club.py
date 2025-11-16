@@ -3,7 +3,7 @@ Club database model
 """
 import uuid
 from datetime import datetime
-from sqlalchemy import Boolean, Column, String, Integer, DateTime, Text, Enum as SQLEnum
+from sqlalchemy import Boolean, Column, String, Integer, DateTime, Text, Enum as SQLEnum, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 import enum
@@ -77,8 +77,8 @@ class Membership(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
     # Foreign keys
-    user_id = Column(UUID(as_uuid=True), nullable=False, index=True)  # Will add FK later
-    club_id = Column(UUID(as_uuid=True), nullable=False, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    club_id = Column(UUID(as_uuid=True), ForeignKey("clubs.id", ondelete="CASCADE"), nullable=False, index=True)
 
     # Membership details
     role = Column(String(50), default="member", nullable=False)  # member, coordinator, admin
@@ -89,6 +89,7 @@ class Membership(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     # Relationships
+    user = relationship("User", back_populates="memberships")
     club = relationship("Club", back_populates="memberships")
 
     def __repr__(self):

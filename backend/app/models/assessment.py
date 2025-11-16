@@ -28,6 +28,7 @@ class Assessment(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     # Relationships
+    user = relationship("User", back_populates="assessments")
     recommendations = relationship("Recommendation", back_populates="assessment", cascade="all, delete-orphan")
 
     def __repr__(self):
