@@ -1,13 +1,14 @@
 # Database Seeding Guide
 
-This guide explains how to populate your ClubCompass database with the 15 clubs from the sample data.
+This guide explains how to populate your ClubCompass database with all 53 clubs from Clubs.json.
 
 ## Overview
 
-We have **15 clubs** total:
-- **5 Co-curricular clubs**: ACM, IEEE, GDSC, Robotics, Cyber Security
-- **5 Extra-curricular clubs**: Cultural, Music, Dance, Drama, Photography
-- **5 Department clubs**: CSE, ECE, Mechanical, Civil, ISE
+We have **53 clubs** total from the real BMSCE clubs data:
+- **26 Co-curricular clubs**: ACM, Aquila Aerospace, Augment.AI, AeroBMSCE, Robotics, Rocketry, Bullz Racing, TeamCodeLocked, DSYNC, Varaince, CORTECHS, CIIE, IIC, EDC, Business Insights, Pentagram, MEA, ELSOC, IEEE CS, IEEE SB, IEEE WIE, IEEE PES, IEEE SPS, GDSC, Synapse, Upagraha
+- **10 Department clubs**: CodeIO, PROTOCOL, ISE Student Club, EEE Association, Gradient, and department-specific chapters (Aquila, DSync, ELSOC, Synapse, VarAInce)
+- **5 Extra-curricular (Social) clubs**: NSS, Rotaract, Leo Satva, Mountaineering Club, Respawn
+- **12 Extra-curricular (Cultural) clubs**: Inksanity, Ninaad, The Groovehouse, Panache, Paramvah Dance, Danz Addix, Fine Arts, Falcons, Pravrutthi, Chiranthana, Samskruthi Sambhrama, BMS MUNSOC
 
 ## Prerequisites
 
@@ -41,7 +42,7 @@ python seed_clubs.py
 python seed_clubs.py --clear
 ```
 - Deletes ALL existing clubs
-- Re-inserts all 15 clubs
+- Re-inserts all 53 clubs
 - Use with caution!
 
 ### Expected Output:
@@ -54,23 +55,23 @@ ClubCompass - Database Seeding Script
 🔧 Ensuring database tables exist...
 ✅ Database tables ready
 
-🌱 Seeding 15 clubs...
-✅ Added: ACM Student Chapter (cocurricular)
-✅ Added: IEEE Student Branch (cocurricular)
-✅ Added: GDSC BMSCE (cocurricular)
-... (continues for all 15 clubs)
+🌱 Seeding 53 clubs...
+✅ Added: ACM (BMSCE ACM Student Chapter) (cocurricular)
+✅ Added: Aquila Aerospace (cocurricular)
+✅ Added: Augment.AI (cocurricular)
+... (continues for all 53 clubs)
 
 📊 Summary:
-   ✅ Clubs added: 15
+   ✅ Clubs added: 53
    ⏭️  Clubs skipped: 0
-   📝 Total clubs in database: 15
+   📝 Total clubs in database: 53
 
 📈 Clubs by category:
-   Cocurricular: 5 clubs (745 total members)
-   Extracurricular: 5 clubs (430 total members)
-   Department: 5 clubs (1080 total members)
+   Cocurricular: 26 clubs (~4000 total members)
+   Department: 10 clubs (~1900 total members)
+   Extracurricular: 17 clubs (~1500 total members)
 
-⭐ Featured clubs: 5
+⭐ Featured clubs: 11
 
 ✨ Database seeding completed successfully!
 ```
@@ -103,7 +104,7 @@ After seeding, verify the data was inserted correctly:
 ### Check total clubs:
 ```sql
 SELECT COUNT(*) FROM clubs;
--- Should return: 15
+-- Should return: 53
 ```
 
 ### Check clubs by category:
@@ -120,9 +121,9 @@ Expected result:
 ```
     category     | club_count | total_members
 -----------------+------------+---------------
- cocurricular    |          5 |           745
- department      |          5 |          1080
- extracurricular |          5 |           430
+ cocurricular    |         26 |        ~4000
+ department      |         10 |        ~1900
+ extracurricular |         17 |        ~1500
 ```
 
 ### List all clubs:
@@ -139,7 +140,7 @@ FROM clubs
 WHERE is_featured = true;
 ```
 
-Expected: 5 featured clubs (IEEE, GDSC, CSE, ECE, ISE)
+Expected: 11 featured clubs including ACM, Augment.AI, TeamCodeLocked, DSYNC, Varaince, IEEE CS, IEEE SB, GDSC, CodeIO, PROTOCOL, ISE Student Club
 
 ## Testing the Integration
 
@@ -190,22 +191,25 @@ Visit:
 
 ## Club Images
 
-The clubs reference logo images at:
+All club logos are stored in `frontend/public/images/clubs/` with the following naming convention:
 ```
-/images/clubs/acm.jpg
-/images/clubs/ieee.jpg
-/images/clubs/gdsc.jpg
-/images/clubs/cultural.jpg
-/images/clubs/music.jpg
-/images/clubs/cse.jpg
+/images/clubs/{club_id}.jpg
 ```
 
-Make sure these images exist in your `frontend/public/images/clubs/` directory.
+For example:
+- `/images/clubs/acm.jpg`
+- `/images/clubs/ieee-sb.jpg`
+- `/images/clubs/gdscl.jpg`
+- `/images/clubs/teamcodelocked.JPG`
+- `/images/clubs/CodeIO.jpg`
+
+**Note:** Some images use `.jpg` extension while others use `.JPG` (case-sensitive). Make sure your image files match the exact casing specified in the seed data.
 
 If images are missing, you can:
 1. Use placeholder images
 2. Update the `logo_url` in the database to point to actual image locations
 3. Set `logo_url` to NULL for clubs without images
+4. All club images are referenced from Clubs.json in the root directory
 
 ## Troubleshooting
 
@@ -248,25 +252,76 @@ DATABASE_URL=postgresql://postgres:password@localhost:5432/clubcompass
 
 ## Data Summary
 
-| Club | Slug | Category | Members | Featured |
-|------|------|----------|---------|----------|
-| ACM Student Chapter | acm | cocurricular | 150 | No |
-| IEEE Student Branch | ieee | cocurricular | 200 | Yes |
-| GDSC BMSCE | gdsc | cocurricular | 180 | Yes |
-| Robotics Club | robotics | cocurricular | 120 | No |
-| Cyber Security Club | cybersec | cocurricular | 95 | No |
-| Cultural Club | cultural | extracurricular | 120 | No |
-| Music Club | music | extracurricular | 90 | No |
-| Dance Troupe | dance | extracurricular | 75 | No |
-| Drama Society | drama | extracurricular | 60 | No |
-| Photography Club | photography | extracurricular | 85 | No |
-| CSE Department Club | cse-dept | department | 250 | Yes |
-| ECE Department Club | ece-dept | department | 220 | Yes |
-| Mechanical Department Club | mech-dept | department | 200 | No |
-| Civil Department Club | civil-dept | department | 180 | No |
-| ISE Department Club | ise-dept | department | 230 | Yes |
+### Co-Curricular Clubs (26)
+| Club | Slug | Members | Featured |
+|------|------|---------|----------|
+| ACM (BMSCE ACM Student Chapter) | acm | 165 | Yes |
+| Aquila Aerospace | aquila | 145 | No |
+| Augment.AI | augmentai | 185 | Yes |
+| AeroBMSCE | aero | 130 | No |
+| Robotics Club | robotics | 155 | No |
+| Rocketry | rocketry | 95 | No |
+| Bullz Racing (SAE) | bullz | 85 | No |
+| TeamCodeLocked | teamcodelocked | 210 | Yes |
+| DSYNC (Data Science) | dsync | 175 | Yes |
+| Varaince (AI & Data Science) | varaince | 190 | Yes |
+| CORTECHS | corrtechs | 125 | No |
+| CIIE | ciie | 140 | No |
+| IIC BMSCE | iic | 160 | No |
+| EDC | edc | 135 | No |
+| Business Insights | business-insights | 115 | No |
+| Pentagram | pentagram | 105 | No |
+| MEA | mea | 195 | No |
+| ELSOC | elsoc | 170 | No |
+| IEEE Computer Society | ieee-cs | 205 | Yes |
+| IEEE Student Branch | ieee-sb | 220 | Yes |
+| IEEE WIE | ieee-wie | 145 | No |
+| IEEE PES | ieee-pes | 125 | No |
+| IEEE SPS | ieee-sps | 110 | No |
+| GDSC | gdscl | 200 | Yes |
+| Synapse (Biotech) | synapse | 120 | No |
+| Upagraha | upagraha | 75 | No |
 
-**Total:** 15 clubs, 2,255 total members, 5 featured clubs
+### Department Clubs (10)
+| Club | Slug | Members | Featured |
+|------|------|---------|----------|
+| CodeIO | codeio | 240 | Yes |
+| PROTOCOL | protocol | 235 | Yes |
+| ISE STUDENT CLUB | iseclub | 215 | Yes |
+| EEE Association | eeea | 190 | No |
+| Gradient | gradient | 180 | No |
+| Aquila (Aerospace Dept) | aquila-dept | 155 | No |
+| DSync (Data Science Dept) | dsync-dept | 165 | No |
+| ELSOC (ECE Dept) | elsoc-dept | 175 | No |
+| Synapse (Biotech Dept) | synapse-dept | 145 | No |
+| VarAInce (AI/DS Dept) | varaince-dept | 170 | No |
+
+### Extra-Curricular - Social (5)
+| Club | Slug | Members | Featured |
+|------|------|---------|----------|
+| NSS | nss | 185 | No |
+| Rotaract | rotaract | 165 | No |
+| Leo Satva | leosatva | 95 | No |
+| Mountaineering Club | mountaineering | 110 | No |
+| Respawn (Gaming Club) | respawn | 135 | No |
+
+### Extra-Curricular - Cultural (12)
+| Club | Slug | Members | Featured |
+|------|------|---------|----------|
+| Inksanity | inksanity | 125 | No |
+| Ninaad | ninaad | 105 | No |
+| The Groovehouse | groovehouse | 140 | No |
+| Panache | panache | 90 | No |
+| Paramvah Dance | paramvah | 85 | No |
+| Danz Addix | danzaddix | 95 | No |
+| Fine Arts Club | finearts | 115 | No |
+| Falcons | falcons | 130 | No |
+| Pravrutthi | pravrutthi | 100 | No |
+| Chiranthana | chiranthana | 110 | No |
+| Samskruthi Sambhrama | samskruthi | 120 | No |
+| BMS MUNSOC | munsoc | 105 | No |
+
+**Total:** 53 clubs, ~7,400 total members, 11 featured clubs
 
 ## Next Steps
 
@@ -284,10 +339,13 @@ After seeding the database:
 - The Python script is idempotent - safe to run multiple times
 - Club IDs are auto-generated UUIDs
 - Timestamps are set to early 2024 dates (can be updated if needed)
-- Some clubs have faculty contacts, some don't (matches sample data)
+- All clubs have faculty contacts with realistic Indian names and emails
 - Social media links are Instagram handles (LinkedIn, Twitter, Website are NULL)
 - All clubs are active by default
-- Featured clubs: IEEE, GDSC, CSE, ECE, ISE (5 total)
+- All club data sourced from Clubs.json in the root directory
+- Image paths follow the convention: `/images/clubs/{club_id}.jpg` (stored in `frontend/public/images/clubs/`)
+- Some clubs appear in both co-curricular and department categories with different slugs (e.g., aquila and aquila-dept)
+- Featured clubs (11 total): ACM, Augment.AI, TeamCodeLocked, DSYNC, Varaince, IEEE CS, IEEE SB, GDSC, CodeIO, PROTOCOL, ISE Student Club
 
 ## Support
 
