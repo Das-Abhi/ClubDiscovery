@@ -13,17 +13,21 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ClipboardList, Calendar } from 'lucide-react'
 import { assessmentApi } from '@/lib/api/assessment'
+import { clubsApi, type Membership } from '@/lib/api/clubs'
 import type { Assessment } from '@/lib/types/assessment'
 
 function ProfileContent() {
   const router = useRouter()
   const { user, logout, isLoading } = useAuth()
   const [assessments, setAssessments] = useState<Assessment[]>([])
+  const [memberships, setMemberships] = useState<Membership[]>([])
   const [loadingAssessments, setLoadingAssessments] = useState(false)
+  const [loadingMemberships, setLoadingMemberships] = useState(false)
 
   useEffect(() => {
     if (user) {
       loadAssessments()
+      loadMemberships()
     }
   }, [user])
 
@@ -38,6 +42,18 @@ function ProfileContent() {
       console.error('Failed to load assessments:', error)
     } finally {
       setLoadingAssessments(false)
+    }
+  }
+
+  const loadMemberships = async () => {
+    setLoadingMemberships(true)
+    try {
+      const data = await clubsApi.getUserMemberships()
+      setMemberships(data)
+    } catch (error) {
+      console.error('Failed to load memberships:', error)
+    } finally {
+      setLoadingMemberships(false)
     }
   }
 
@@ -221,19 +237,75 @@ function ProfileContent() {
             <h2 className="text-2xl font-bold text-white mb-4">
               My Club Memberships
             </h2>
-            <div className="text-gray-400 text-center py-12">
-              <p className="text-lg mb-2">No club memberships yet</p>
-              <p className="text-sm">
-                Join clubs to see them listed here
-              </p>
-              <Button
-                onClick={() => router.push('/clubs/cocurricular')}
-                variant="glass"
-                className="mt-4"
-              >
-                Explore Clubs
-              </Button>
-            </div>
+
+            {loadingMemberships ? (
+              <div className="text-center py-12">
+                <div className="w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                <p className="text-gray-400">Loading memberships...</p>
+              </div>
+            ) : memberships.length > 0 ? (
+              <div className="space-y-3">
+                {memberships.map((membership) => (
+                  <div
+                    key={membership.id}
+                    className="p-4 rounded-lg border border-white/10 hover:border-red-500/50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {membership.club?.logo_url ? (
+                          <img
+                            src={membership.club.logo_url}
+                            alt={membership.club.name}
+                            className="w-12 h-12 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center text-sm font-bold text-white">
+                            {membership.club?.name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2)}
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-white font-medium">
+                            {membership.club?.name}
+                          </p>
+                          <p className="text-sm text-gray-400 flex items-center gap-2">
+                            <span className="capitalize">{membership.role}</span>
+                            <span>•</span>
+                            <Calendar className="w-3 h-3" />
+                            Joined {new Date(membership.joined_at).toLocaleDateString('en-US', {
+                              month: 'short',
+                              year: 'numeric',
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                      {membership.club && (
+                        <Button
+                          onClick={() => router.push(`/clubs/${membership.club?.category}`)}
+                          variant="outline"
+                          size="sm"
+                        >
+                          View Club
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-gray-400 text-center py-12">
+                <p className="text-lg mb-2">No club memberships yet</p>
+                <p className="text-sm">
+                  Join clubs to see them listed here
+                </p>
+                <Button
+                  onClick={() => router.push('/clubs/cocurricular')}
+                  variant="glass"
+                  className="mt-4"
+                >
+                  Explore Clubs
+                </Button>
+              </div>
+            )}
           </Card>
         </motion.div>
       </div>

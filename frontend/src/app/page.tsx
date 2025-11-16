@@ -1,14 +1,37 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ClubCarousel } from '@/components/clubs/ClubCarousel'
 import { ClubGrid } from '@/components/clubs/ClubGrid'
 import { Button } from '@/components/ui/button'
-import { trendingClubs, sampleClubs } from '@/lib/data/sampleClubs'
+import { clubsApi, type Club } from '@/lib/api/clubs'
 import { Sparkles, TrendingUp, Award } from 'lucide-react'
 
 export default function HomePage() {
-  const featuredClubs = sampleClubs.slice(0, 4)
+  const [featuredClubs, setFeaturedClubs] = useState<Club[]>([])
+  const [popularClubs, setPopularClubs] = useState<Club[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchClubs = async () => {
+      try {
+        setIsLoading(true)
+        const [featured, popular] = await Promise.all([
+          clubsApi.getFeaturedClubs(4),
+          clubsApi.getPopularClubs(5),
+        ])
+        setFeaturedClubs(featured)
+        setPopularClubs(popular)
+      } catch (error) {
+        console.error('Failed to load clubs:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchClubs()
+  }, [])
 
   return (
     <div className="min-h-screen">
@@ -67,7 +90,14 @@ export default function HomePage() {
             Trending Clubs
           </h2>
         </div>
-        <ClubCarousel clubs={trendingClubs} />
+        {isLoading ? (
+          <div className="text-center py-12">
+            <div className="w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-gray-400">Loading trending clubs...</p>
+          </div>
+        ) : (
+          <ClubCarousel clubs={popularClubs} />
+        )}
       </section>
 
       {/* Featured Clubs */}
@@ -75,16 +105,25 @@ export default function HomePage() {
         <h2 className="text-2xl md:text-3xl font-bold text-white mb-8">
           Featured Clubs
         </h2>
-        <ClubGrid clubs={featuredClubs} onClubClick={(club) => {
-          window.location.href = `/clubs/${club.slug}`
-        }} />
-        <div className="text-center mt-12">
-          <Link href="/clubs/cocurricular">
-            <Button variant="outline" size="lg">
-              View All Clubs
-            </Button>
-          </Link>
-        </div>
+        {isLoading ? (
+          <div className="text-center py-12">
+            <div className="w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-gray-400">Loading featured clubs...</p>
+          </div>
+        ) : (
+          <>
+            <ClubGrid clubs={featuredClubs} onClubClick={(club) => {
+              window.location.href = `/clubs/${club.slug}`
+            }} />
+            <div className="text-center mt-12">
+              <Link href="/clubs/cocurricular">
+                <Button variant="outline" size="lg">
+                  View All Clubs
+                </Button>
+              </Link>
+            </div>
+          </>
+        )}
       </section>
 
       {/* Category Section */}
