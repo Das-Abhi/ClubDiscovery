@@ -106,11 +106,13 @@ export function ClubsPageTemplate({
         <ClubGrid clubs={filteredClubs} onClubClick={handleClubClick} />
 
         {/* Club Modal */}
-        <ClubModal
-          club={selectedClub}
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-        />
+        {selectedClub && (
+          <ClubModal
+            club={selectedClub}
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+          />
+        )}
       </div>
     </div>
   )

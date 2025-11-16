@@ -121,11 +121,13 @@ function SearchPageContent() {
         )}
 
         {/* Club Modal */}
-        <ClubModal
-          club={selectedClub}
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-        />
+        {selectedClub && (
+          <ClubModal
+            club={selectedClub}
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+          />
+        )}
       </div>
     </div>
   )
