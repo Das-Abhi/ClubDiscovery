@@ -51,7 +51,6 @@ services:
       - REDIS_URL=redis://redis:6379
       - JWT_SECRET=dev-secret-key-change-in-production
       - JWT_ALGORITHM=HS256
-      - CORS_ORIGINS=http://localhost:3000
       - ENVIRONMENT=development
     depends_on:
       db:
