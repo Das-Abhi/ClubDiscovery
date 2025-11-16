@@ -5,6 +5,7 @@ import uuid
 from datetime import datetime
 from sqlalchemy import Boolean, Column, String, DateTime, CheckConstraint
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 
 from app.database import Base
 
@@ -40,6 +41,10 @@ class User(Base):
             name="email_format_check"
         ),
     )
+
+    # Relationships
+    memberships = relationship("Membership", back_populates="user", cascade="all, delete-orphan")
+    assessments = relationship("Assessment", back_populates="user")
 
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email}, full_name={self.full_name})>"
