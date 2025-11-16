@@ -3,15 +3,14 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, Menu, X, Compass, User, LogOut } from 'lucide-react'
-import { Input } from '@/components/ui/input'
+import { Menu, X, Compass, User, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { SearchAutocomplete } from './SearchAutocomplete'
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const router = useRouter()
   const { user, isAuthenticated, logout, loadUser } = useAuth()
@@ -30,14 +29,6 @@ export function Header() {
     { href: '/clubs/department', label: 'Departments' },
     { href: '/assessment', label: 'Take Assessment' },
   ]
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      // Navigate to search results
-      window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`
-    }
-  }
 
   const handleLogout = () => {
     logout()
@@ -71,19 +62,7 @@ export function Header() {
           </nav>
 
           {/* Search Bar */}
-          <form
-            onSubmit={handleSearch}
-            className="hidden md:flex items-center gap-2 glass rounded-lg px-3 py-1.5 min-w-[200px] lg:min-w-[300px]"
-          >
-            <Search className="h-4 w-4 text-gray-400" />
-            <Input
-              type="text"
-              placeholder="Search clubs..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm h-auto p-0"
-            />
-          </form>
+          <SearchAutocomplete className="hidden md:block min-w-[200px] lg:min-w-[300px]" />
 
           {/* Auth Section (Desktop) */}
           <div className="hidden lg:flex items-center gap-3">
@@ -182,16 +161,7 @@ export function Header() {
         >
           <div className="py-4 space-y-4">
             {/* Mobile Search */}
-            <form onSubmit={handleSearch} className="flex items-center gap-2 glass rounded-lg px-3 py-2">
-              <Search className="h-4 w-4 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Search clubs..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm h-auto p-0"
-              />
-            </form>
+            <SearchAutocomplete onSelect={() => setIsMenuOpen(false)} />
 
             {/* Mobile Navigation */}
             <nav className="flex flex-col gap-2">
