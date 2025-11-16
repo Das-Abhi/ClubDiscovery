@@ -64,17 +64,12 @@ class ClubUpdate(BaseModel):
 class ClubResponse(ClubBase):
     """Schema for club response"""
 
-    id: str
+    id: UUID  # Pydantic accepts UUID and auto-serializes to string in JSON
     member_count: int
     view_count: int
     created_at: datetime
     updated_at: datetime
     is_active: bool
-
-    @field_serializer('id')
-    def serialize_id(self, value: UUID, _info) -> str:
-        """Convert UUID to string for JSON serialization"""
-        return str(value)
 
     class Config:
         from_attributes = True
@@ -106,17 +101,12 @@ class MembershipCreate(MembershipBase):
 class MembershipResponse(MembershipBase):
     """Schema for membership response"""
 
-    id: str
-    user_id: str
-    club_id: str
+    id: UUID  # Pydantic auto-serializes UUIDs to strings in JSON
+    user_id: UUID
+    club_id: UUID
     joined_at: datetime
     updated_at: datetime
     club: Optional[ClubResponse] = None
-
-    @field_serializer('id', 'user_id', 'club_id')
-    def serialize_uuids(self, value: UUID, _info) -> str:
-        """Convert UUID fields to strings for JSON serialization"""
-        return str(value)
 
     class Config:
         from_attributes = True

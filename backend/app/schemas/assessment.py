@@ -55,15 +55,10 @@ class AssessmentResult(BaseModel):
 class AssessmentResponse(BaseModel):
     """Schema for assessment response"""
 
-    id: str
-    user_id: Optional[str]
+    id: UUID  # Pydantic auto-serializes UUIDs to strings in JSON
+    user_id: Optional[UUID]  # Can be None for anonymous assessments
     responses: AssessmentResponses
     created_at: datetime
-
-    @field_serializer('id', 'user_id')
-    def serialize_uuids(self, value: Optional[UUID], _info) -> Optional[str]:
-        """Convert UUID fields to strings for JSON serialization"""
-        return str(value) if value is not None else None
 
     class Config:
         from_attributes = True

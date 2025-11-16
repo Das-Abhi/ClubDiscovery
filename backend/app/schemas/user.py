@@ -52,17 +52,12 @@ class UserLogin(BaseModel):
 class UserResponse(UserBase):
     """Schema for user response (public user data)"""
 
-    id: str
+    id: UUID  # Pydantic accepts UUID and auto-serializes to string in JSON
     created_at: datetime
     updated_at: datetime
     email_verified: bool
     is_active: bool
     is_admin: bool
-
-    @field_serializer('id')
-    def serialize_id(self, value: UUID, _info) -> str:
-        """Convert UUID to string for JSON serialization"""
-        return str(value)
 
     class Config:
         from_attributes = True
