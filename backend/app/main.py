@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 
 from app.core.config import settings
-from app.api.v1 import auth, clubs, users, assessment
+from app.api.v1 import auth, clubs, users, assessment, admin
 
 # Create FastAPI application
 app = FastAPI(
@@ -59,6 +59,7 @@ app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(clubs.router, prefix="/api/v1/clubs", tags=["Clubs"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
 app.include_router(assessment.router, prefix="/api/v1/assessments", tags=["Assessment"])
+app.include_router(admin.router, prefix="/api/v1", tags=["Admin"])
 
 
 if __name__ == "__main__":
