@@ -13,7 +13,7 @@ from app.schemas.assessment import (
     ClubRecommendation,
 )
 from app.services.assessment_service import assessment_service
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, get_optional_user
 from app.models.user import User
 
 router = APIRouter()
@@ -23,7 +23,7 @@ router = APIRouter()
 async def submit_assessment(
     assessment_data: AssessmentCreate,
     db: Session = Depends(get_db),
-    current_user: Optional[User] = Depends(get_current_user) if False else None  # Optional auth
+    current_user: Optional[User] = Depends(get_optional_user)
 ):
     """
     Submit assessment and get club recommendations
