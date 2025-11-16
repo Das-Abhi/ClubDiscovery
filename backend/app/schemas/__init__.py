@@ -18,6 +18,16 @@ from app.schemas.assessment import (
     ClubRecommendation,
     ReasoningItem,
 )
+from app.schemas.club import (
+    ClubBase,
+    ClubCreate,
+    ClubUpdate,
+    ClubResponse,
+    ClubListResponse,
+    MembershipBase,
+    MembershipCreate,
+    MembershipResponse,
+)
 
 __all__ = [
     "UserBase",
@@ -33,4 +43,12 @@ __all__ = [
     "AssessmentResult",
     "ClubRecommendation",
     "ReasoningItem",
+    "ClubBase",
+    "ClubCreate",
+    "ClubUpdate",
+    "ClubResponse",
+    "ClubListResponse",
+    "MembershipBase",
+    "MembershipCreate",
+    "MembershipResponse",
 ]

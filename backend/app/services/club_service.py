@@ -1,0 +1,269 @@
+"""
+Club service for handling club operations
+"""
+from typing import List, Optional
+from sqlalchemy.orm import Session
+from sqlalchemy import or_, func
+from fastapi import HTTPException, status
+import uuid
+
+from app.models.club import Club, Membership, ClubCategory
+from app.schemas.club import ClubCreate, ClubUpdate
+
+
+class ClubService:
+    """Service for handling club operations"""
+
+    @staticmethod
+    def get_club_by_id(db: Session, club_id: str) -> Optional[Club]:
+        """Get club by ID"""
+        try:
+            club_uuid = uuid.UUID(club_id)
+            return db.query(Club).filter(Club.id == club_uuid).first()
+        except ValueError:
+            return None
+
+    @staticmethod
+    def get_club_by_slug(db: Session, slug: str) -> Optional[Club]:
+        """Get club by slug"""
+        return db.query(Club).filter(Club.slug == slug).first()
+
+    @staticmethod
+    def get_clubs(
+        db: Session,
+        category: Optional[str] = None,
+        search: Optional[str] = None,
+        skip: int = 0,
+        limit: int = 100,
+        is_active: bool = True
+    ) -> tuple[List[Club], int]:
+        """
+        Get clubs with optional filtering
+
+        Returns: (clubs, total_count)
+        """
+        query = db.query(Club)
+
+        # Filter by active status
+        if is_active is not None:
+            query = query.filter(Club.is_active == is_active)
+
+        # Filter by category
+        if category:
+            try:
+                cat_enum = ClubCategory(category)
+                query = query.filter(Club.category == cat_enum)
+            except ValueError:
+                pass  # Invalid category, skip filter
+
+        # Search
+        if search:
+            search_pattern = f"%{search}%"
+            query = query.filter(
+                or_(
+                    Club.name.ilike(search_pattern),
+                    Club.tagline.ilike(search_pattern),
+                    Club.description.ilike(search_pattern)
+                )
+            )
+
+        # Get total count
+        total = query.count()
+
+        # Apply pagination and sorting
+        clubs = query.order_by(Club.is_featured.desc(), Club.created_at.desc())\
+            .offset(skip)\
+            .limit(limit)\
+            .all()
+
+        return clubs, total
+
+    @staticmethod
+    def create_club(db: Session, club_data: ClubCreate) -> Club:
+        """Create a new club"""
+        # Check if slug already exists
+        existing_club = ClubService.get_club_by_slug(db, club_data.slug)
+        if existing_club:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Club with this slug already exists"
+            )
+
+        # Check if name already exists
+        existing_name = db.query(Club).filter(Club.name == club_data.name).first()
+        if existing_name:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Club with this name already exists"
+            )
+
+        # Create club
+        club = Club(**club_data.model_dump())
+        db.add(club)
+        db.commit()
+        db.refresh(club)
+
+        return club
+
+    @staticmethod
+    def update_club(db: Session, club_id: str, club_data: ClubUpdate) -> Optional[Club]:
+        """Update a club"""
+        club = ClubService.get_club_by_id(db, club_id)
+        if not club:
+            return None
+
+        # Update only provided fields
+        update_data = club_data.model_dump(exclude_unset=True)
+        for field, value in update_data.items():
+            setattr(club, field, value)
+
+        db.commit()
+        db.refresh(club)
+
+        return club
+
+    @staticmethod
+    def delete_club(db: Session, club_id: str) -> bool:
+        """Delete a club"""
+        club = ClubService.get_club_by_id(db, club_id)
+        if not club:
+            return False
+
+        db.delete(club)
+        db.commit()
+
+        return True
+
+    @staticmethod
+    def increment_view_count(db: Session, club_id: str) -> None:
+        """Increment club view count"""
+        club = ClubService.get_club_by_id(db, club_id)
+        if club:
+            club.view_count += 1
+            db.commit()
+
+    @staticmethod
+    def get_featured_clubs(db: Session, limit: int = 10) -> List[Club]:
+        """Get featured clubs"""
+        return db.query(Club)\
+            .filter(Club.is_featured == True, Club.is_active == True)\
+            .order_by(Club.created_at.desc())\
+            .limit(limit)\
+            .all()
+
+    @staticmethod
+    def get_popular_clubs(db: Session, limit: int = 10) -> List[Club]:
+        """Get popular clubs by member count"""
+        return db.query(Club)\
+            .filter(Club.is_active == True)\
+            .order_by(Club.member_count.desc())\
+            .limit(limit)\
+            .all()
+
+
+class MembershipService:
+    """Service for handling club membership operations"""
+
+    @staticmethod
+    def get_membership(db: Session, user_id: str, club_id: str) -> Optional[Membership]:
+        """Get membership by user and club"""
+        try:
+            user_uuid = uuid.UUID(user_id)
+            club_uuid = uuid.UUID(club_id)
+            return db.query(Membership).filter(
+                Membership.user_id == user_uuid,
+                Membership.club_id == club_uuid
+            ).first()
+        except ValueError:
+            return None
+
+    @staticmethod
+    def get_user_memberships(db: Session, user_id: str) -> List[Membership]:
+        """Get all memberships for a user"""
+        try:
+            user_uuid = uuid.UUID(user_id)
+            return db.query(Membership)\
+                .filter(Membership.user_id == user_uuid)\
+                .order_by(Membership.joined_at.desc())\
+                .all()
+        except ValueError:
+            return []
+
+    @staticmethod
+    def join_club(db: Session, user_id: str, club_id: str, role: str = "member") -> Membership:
+        """User joins a club"""
+        # Check if club exists
+        club = ClubService.get_club_by_id(db, club_id)
+        if not club:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Club not found"
+            )
+
+        # Check if already a member
+        existing = MembershipService.get_membership(db, user_id, club_id)
+        if existing:
+            if existing.status == "active":
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Already a member of this club"
+                )
+            else:
+                # Reactivate membership
+                existing.status = "active"
+                db.commit()
+                db.refresh(existing)
+                return existing
+
+        # Create membership
+        try:
+            user_uuid = uuid.UUID(user_id)
+            club_uuid = uuid.UUID(club_id)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid user or club ID"
+            )
+
+        membership = Membership(
+            user_id=user_uuid,
+            club_id=club_uuid,
+            role=role,
+            status="active"
+        )
+
+        db.add(membership)
+
+        # Increment club member count
+        club.member_count += 1
+
+        db.commit()
+        db.refresh(membership)
+
+        return membership
+
+    @staticmethod
+    def leave_club(db: Session, user_id: str, club_id: str) -> bool:
+        """User leaves a club"""
+        membership = MembershipService.get_membership(db, user_id, club_id)
+        if not membership:
+            return False
+
+        # Get club to update member count
+        club = ClubService.get_club_by_id(db, club_id)
+
+        # Delete membership
+        db.delete(membership)
+
+        # Decrement club member count
+        if club and club.member_count > 0:
+            club.member_count -= 1
+
+        db.commit()
+
+        return True
+
+
+# Create singleton instances
+club_service = ClubService()
+membership_service = MembershipService()
