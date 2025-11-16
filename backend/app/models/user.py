@@ -31,6 +31,7 @@ class User(Base):
     # Status flags
     email_verified = Column(Boolean, default=False, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
+    is_admin = Column(Boolean, default=False, nullable=False)
 
     # Constraints
     __table_args__ = (
