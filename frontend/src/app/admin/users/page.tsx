@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Users, Search, Shield, UserCheck, UserX, RefreshCw, Mail } from 'lucide-react'
+import { Users, Search, Shield, UserCheck, UserX, RefreshCw, Mail, Eye } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -325,6 +325,17 @@ function AdminUsersContent() {
                       {/* Actions */}
                       <td className="p-4">
                         <div className="flex items-center justify-center gap-2">
+                          {/* View Details */}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => router.push(`/admin/users/${u.id}`)}
+                            className="text-blue-400 hover:text-blue-300"
+                            title="View user details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+
                           {/* Toggle Admin Role */}
                           <Button
                             variant="ghost"

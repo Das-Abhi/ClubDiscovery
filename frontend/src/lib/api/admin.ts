@@ -192,5 +192,41 @@ export const adminApi = {
     } catch (error) {
       return handleApiError(error)
     }
+  },
+
+  /**
+   * Create a new club
+   */
+  createClub: async (clubData: Partial<AdminClub>): Promise<AdminClub> => {
+    try {
+      const response = await apiClient.post<AdminClub>('/clubs/', clubData)
+      return response.data
+    } catch (error) {
+      return handleApiError(error)
+    }
+  },
+
+  /**
+   * Update a club
+   */
+  updateClub: async (clubId: string, clubData: Partial<AdminClub>): Promise<AdminClub> => {
+    try {
+      const response = await apiClient.patch<AdminClub>(`/clubs/${clubId}`, clubData)
+      return response.data
+    } catch (error) {
+      return handleApiError(error)
+    }
+  },
+
+  /**
+   * Get club by ID
+   */
+  getClubById: async (clubId: string): Promise<AdminClub> => {
+    try {
+      const response = await apiClient.get<AdminClub>(`/clubs/${clubId}`)
+      return response.data
+    } catch (error) {
+      return handleApiError(error)
+    }
   }
 }
