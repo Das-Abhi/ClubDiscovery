@@ -5,13 +5,14 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Building2, Search, Star, Eye, EyeOff, Trash2, RefreshCw } from 'lucide-react'
+import { Building2, Search, Star, Eye, EyeOff, Trash2, RefreshCw, Plus, Edit } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { AuthGuard } from '@/components/auth/AuthGuard'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { adminApi, type AdminClub } from '@/lib/api/admin'
+import { ClubFormModal, type ClubFormData } from '@/components/admin/ClubFormModal'
 
 function AdminClubsContent() {
   const router = useRouter()
@@ -23,6 +24,9 @@ function AdminClubsContent() {
   const [searchQuery, setSearchQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  const [selectedClub, setSelectedClub] = useState<AdminClub | null>(null)
 
   useEffect(() => {
     // Check if user is admin
@@ -118,6 +122,37 @@ function AdminClubsContent() {
     }
   }
 
+  const handleOpenCreateModal = () => {
+    setModalMode('create')
+    setSelectedClub(null)
+    setIsModalOpen(true)
+  }
+
+  const handleOpenEditModal = (club: AdminClub) => {
+    setModalMode('edit')
+    setSelectedClub(club)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedClub(null)
+  }
+
+  const handleSubmitClub = async (data: ClubFormData) => {
+    if (modalMode === 'create') {
+      // Create new club
+      const newClub = await adminApi.createClub(data)
+      setClubs([newClub, ...clubs])
+      alert('Club created successfully')
+    } else if (modalMode === 'edit' && selectedClub) {
+      // Update existing club
+      const updatedClub = await adminApi.updateClub(selectedClub.id, data)
+      setClubs(clubs.map((club) => (club.id === selectedClub.id ? updatedClub : club)))
+      alert('Club updated successfully')
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -153,10 +188,16 @@ function AdminClubsContent() {
               Manage all clubs, featured status, and visibility
             </p>
           </div>
-          <Button onClick={loadClubs} variant="outline" size="sm">
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button onClick={handleOpenCreateModal} variant="glass">
+              <Plus className="w-4 h-4 mr-2" />
+              Create Club
+            </Button>
+            <Button onClick={loadClubs} variant="outline" size="sm">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
+            </Button>
+          </div>
         </div>
 
         {/* Filters and Search */}
@@ -316,6 +357,17 @@ function AdminClubsContent() {
                       {/* Actions */}
                       <td className="p-4">
                         <div className="flex items-center justify-center gap-2">
+                          {/* Edit */}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOpenEditModal(club)}
+                            className="text-blue-400 hover:text-blue-300"
+                            title="Edit club"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+
                           {/* Toggle Featured */}
                           <Button
                             variant="ghost"
@@ -376,6 +428,15 @@ function AdminClubsContent() {
             Back to Dashboard
           </Button>
         </div>
+
+        {/* Club Form Modal */}
+        <ClubFormModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onSubmit={handleSubmitClub}
+          initialData={selectedClub || undefined}
+          mode={modalMode}
+        />
       </div>
     </div>
   )
