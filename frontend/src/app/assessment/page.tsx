@@ -3,7 +3,8 @@
  */
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { QuestionCard } from '@/components/assessment/QuestionCard'
 import { ResultsDisplay } from '@/components/assessment/ResultsDisplay'
@@ -73,16 +74,41 @@ const QUESTIONS = [
   },
 ]
 
-export default function AssessmentPage() {
+function AssessmentContent() {
   const { user } = useAuth()
+  const searchParams = useSearchParams()
+  const assessmentId = searchParams.get('id')
+
   const [currentStep, setCurrentStep] = useState(0)
   const [responses, setResponses] = useState<Partial<AssessmentResponses>>({})
   const [results, setResults] = useState<AssessmentResult | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const currentQuestion = QUESTIONS[currentStep]
   const progress = ((currentStep + 1) / QUESTIONS.length) * 100
+
+  // Load assessment history if ID is provided
+  useEffect(() => {
+    if (assessmentId) {
+      loadAssessmentHistory(assessmentId)
+    }
+  }, [assessmentId])
+
+  const loadAssessmentHistory = async (id: string) => {
+    setIsLoadingHistory(true)
+    setError(null)
+
+    try {
+      const result = await assessmentApi.getAssessment(id)
+      setResults(result)
+    } catch (err: any) {
+      setError(err.message || 'Failed to load assessment history')
+    } finally {
+      setIsLoadingHistory(false)
+    }
+  }
 
   const handleSelect = (value: string) => {
     setResponses((prev) => ({
@@ -136,6 +162,18 @@ export default function AssessmentPage() {
 
   const isStepComplete = responses[currentQuestion.key] !== undefined
   const canProceed = isStepComplete
+
+  // Show loading state when fetching assessment history
+  if (isLoadingHistory) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-400">Loading assessment results...</p>
+        </div>
+      </div>
+    )
+  }
 
   // Show results if available
   if (results) {
@@ -256,5 +294,20 @@ export default function AssessmentPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function AssessmentPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-400">Loading...</p>
+        </div>
+      </div>
+    }>
+      <AssessmentContent />
+    </Suspense>
   )
 }
