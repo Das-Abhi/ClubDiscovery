@@ -4,6 +4,7 @@ Run this script to populate the clubs table
 """
 import sys
 from datetime import datetime
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.database import SessionLocal, engine, Base
@@ -921,7 +922,7 @@ def seed_clubs(db: Session, clear_existing: bool = False):
         for category in ClubCategory:
             count = db.query(Club).filter(Club.category == category).count()
             total_members = db.query(Club).filter(Club.category == category).with_entities(
-                db.func.sum(Club.member_count)
+                func.sum(Club.member_count)
             ).scalar() or 0
             print(f"   {category.value.capitalize()}: {count} clubs ({total_members} total members)")
 
