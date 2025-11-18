@@ -28,8 +28,6 @@ export interface AdminUser {
   id: string
   email: string
   full_name: string
-  university_id: string
-  branch: string
   created_at: string
   updated_at: string
   email_verified: boolean
