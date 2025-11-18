@@ -6,9 +6,8 @@ import sys
 from datetime import datetime
 from sqlalchemy.orm import Session
 
-from app.database import SessionLocal, engine
+from app.database import SessionLocal, engine, Base
 from app.models.club import Club, ClubCategory
-from app.models import Base
 
 
 # Club data from Clubs.json in project root
