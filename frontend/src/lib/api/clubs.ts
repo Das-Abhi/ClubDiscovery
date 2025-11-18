@@ -2,6 +2,7 @@
  * Club API client
  */
 import { apiClient, handleApiError } from './client'
+import type { Announcement, AnnouncementCreate, AnnouncementUpdate, GallerySettings, GallerySettingsUpdate } from '@/lib/types/club'
 
 export interface Club {
   id: string
@@ -134,6 +135,104 @@ export const clubsApi = {
   getUserMemberships: async (): Promise<Membership[]> => {
     try {
       const response = await apiClient.get<Membership[]>('/users/me/memberships')
+      return response.data
+    } catch (error) {
+      return handleApiError(error)
+    }
+  },
+
+  // Announcement methods
+
+  /**
+   * Get announcements for a club
+   */
+  getClubAnnouncements: async (clubId: string, params?: {
+    is_published?: boolean
+    limit?: number
+  }): Promise<Announcement[]> => {
+    try {
+      const response = await apiClient.get<Announcement[]>(`/clubs/${clubId}/announcements`, { params })
+      return response.data
+    } catch (error) {
+      return handleApiError(error)
+    }
+  },
+
+  /**
+   * Create an announcement (admin only)
+   */
+  createAnnouncement: async (clubId: string, data: {
+    title: string
+    content: string
+    is_published?: boolean
+  }): Promise<Announcement> => {
+    try {
+      const response = await apiClient.post<Announcement>(`/clubs/${clubId}/announcements`, data)
+      return response.data
+    } catch (error) {
+      return handleApiError(error)
+    }
+  },
+
+  /**
+   * Update an announcement (admin only)
+   */
+  updateAnnouncement: async (announcementId: string, data: AnnouncementUpdate): Promise<Announcement> => {
+    try {
+      const response = await apiClient.patch<Announcement>(`/clubs/announcements/${announcementId}`, data)
+      return response.data
+    } catch (error) {
+      return handleApiError(error)
+    }
+  },
+
+  /**
+   * Delete an announcement (admin only)
+   */
+  deleteAnnouncement: async (announcementId: string): Promise<void> => {
+    try {
+      await apiClient.delete(`/clubs/announcements/${announcementId}`)
+    } catch (error) {
+      return handleApiError(error)
+    }
+  },
+
+  // Gallery methods
+
+  /**
+   * Get gallery settings for a club
+   */
+  getClubGallery: async (clubId: string): Promise<GallerySettings | null> => {
+    try {
+      const response = await apiClient.get<GallerySettings>(`/clubs/${clubId}/gallery`)
+      return response.data
+    } catch (error: any) {
+      // Return null if gallery not configured (404)
+      if (error.response?.status === 404) {
+        return null
+      }
+      return handleApiError(error)
+    }
+  },
+
+  /**
+   * Create or update gallery settings (admin only)
+   */
+  updateGallerySettings: async (clubId: string, data: GallerySettingsUpdate): Promise<GallerySettings> => {
+    try {
+      const response = await apiClient.post<GallerySettings>(`/clubs/${clubId}/gallery`, data)
+      return response.data
+    } catch (error) {
+      return handleApiError(error)
+    }
+  },
+
+  /**
+   * Refresh Instagram gallery cache (admin only)
+   */
+  refreshGallery: async (clubId: string): Promise<GallerySettings> => {
+    try {
+      const response = await apiClient.post<GallerySettings>(`/clubs/${clubId}/gallery/refresh`)
       return response.data
     } catch (error) {
       return handleApiError(error)

@@ -3,7 +3,7 @@ Initialize database tables
 Run this script to create all database tables
 """
 from app.database import engine, Base
-from app.models import User, Assessment, Recommendation, Club, Membership
+from app.models import User, Assessment, Recommendation, Club, Membership, Announcement, GallerySettings
 
 
 def init_db():
@@ -14,6 +14,8 @@ def init_db():
     print("- Recommendations table")
     print("- Clubs table")
     print("- Memberships table")
+    print("- Announcements table")
+    print("- Gallery Settings table")
 
     Base.metadata.create_all(bind=engine)
 
@@ -24,6 +26,8 @@ def init_db():
     print("  • recommendations")
     print("  • clubs")
     print("  • memberships")
+    print("  • announcements")
+    print("  • gallery_settings")
 
 
 if __name__ == "__main__":

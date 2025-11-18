@@ -110,3 +110,98 @@ class MembershipResponse(MembershipBase):
 
     class Config:
         from_attributes = True
+
+
+class AnnouncementBase(BaseModel):
+    """Base announcement schema"""
+
+    title: str = Field(..., min_length=1, max_length=255)
+    content: str = Field(..., min_length=1)
+    is_published: bool = True
+
+
+class AnnouncementCreate(AnnouncementBase):
+    """Schema for creating an announcement"""
+
+    club_id: UUID
+
+
+class AnnouncementUpdate(BaseModel):
+    """Schema for updating an announcement"""
+
+    title: Optional[str] = Field(None, min_length=1, max_length=255)
+    content: Optional[str] = Field(None, min_length=1)
+    is_published: Optional[bool] = None
+
+
+class AnnouncementResponse(AnnouncementBase):
+    """Schema for announcement response"""
+
+    id: UUID
+    club_id: UUID
+    created_by: Optional[UUID] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class GallerySettingsBase(BaseModel):
+    """Base gallery settings schema"""
+
+    instagram_username: Optional[str] = Field(None, max_length=255)
+    display_gallery: bool = True
+    max_posts: int = Field(4, ge=1, le=12)
+
+
+class GallerySettingsCreate(GallerySettingsBase):
+    """Schema for creating gallery settings"""
+
+    club_id: UUID
+
+
+class GallerySettingsUpdate(BaseModel):
+    """Schema for updating gallery settings"""
+
+    instagram_username: Optional[str] = Field(None, max_length=255)
+    display_gallery: Optional[bool] = None
+    max_posts: Optional[int] = Field(None, ge=1, le=12)
+
+
+class InstagramPost(BaseModel):
+    """Schema for Instagram post data"""
+
+    id: str
+    caption: Optional[str] = None
+    media_url: str
+    permalink: str
+    timestamp: str
+    media_type: str  # IMAGE, VIDEO, CAROUSEL_ALBUM
+
+
+class GallerySettingsResponse(GallerySettingsBase):
+    """Schema for gallery settings response"""
+
+    id: UUID
+    club_id: UUID
+    cached_posts: Optional[List[InstagramPost]] = None
+    cache_updated_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+    @field_serializer('cached_posts')
+    def serialize_cached_posts(self, cached_posts: Optional[str], _info):
+        """Deserialize JSON string to list of dicts"""
+        if cached_posts is None:
+            return None
+        if isinstance(cached_posts, str):
+            import json
+            try:
+                return json.loads(cached_posts)
+            except:
+                return None
+        return cached_posts
+
+    class Config:
+        from_attributes = True

@@ -49,3 +49,54 @@ export interface ClubFilters {
   page?: number
   limit?: number
 }
+
+export interface Announcement {
+  id: string
+  club_id: string
+  created_by?: string
+  title: string
+  content: string
+  is_published: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface AnnouncementCreate {
+  club_id: string
+  title: string
+  content: string
+  is_published?: boolean
+}
+
+export interface AnnouncementUpdate {
+  title?: string
+  content?: string
+  is_published?: boolean
+}
+
+export interface InstagramPost {
+  id: string
+  caption?: string
+  media_url: string
+  permalink: string
+  timestamp: string
+  media_type: string
+}
+
+export interface GallerySettings {
+  id: string
+  club_id: string
+  instagram_username?: string
+  display_gallery: boolean
+  max_posts: number
+  cached_posts?: InstagramPost[]
+  cache_updated_at?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface GallerySettingsUpdate {
+  instagram_username?: string
+  display_gallery?: boolean
+  max_posts?: number
+}
