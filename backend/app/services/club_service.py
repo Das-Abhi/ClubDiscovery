@@ -7,8 +7,8 @@ from sqlalchemy import or_, func
 from fastapi import HTTPException, status
 import uuid
 
-from app.models.club import Club, Membership, ClubCategory
-from app.schemas.club import ClubCreate, ClubUpdate
+from app.models.club import Club, Membership, ClubCategory, Announcement, GallerySettings
+from app.schemas.club import ClubCreate, ClubUpdate, AnnouncementCreate, AnnouncementUpdate, GallerySettingsCreate, GallerySettingsUpdate
 
 
 class ClubService:
@@ -264,6 +264,195 @@ class MembershipService:
         return True
 
 
+class AnnouncementService:
+    """Service for handling announcement operations"""
+
+    @staticmethod
+    def get_announcement_by_id(db: Session, announcement_id: str) -> Optional[Announcement]:
+        """Get announcement by ID"""
+        try:
+            announcement_uuid = uuid.UUID(announcement_id)
+            return db.query(Announcement).filter(Announcement.id == announcement_uuid).first()
+        except ValueError:
+            return None
+
+    @staticmethod
+    def get_club_announcements(
+        db: Session,
+        club_id: str,
+        is_published: Optional[bool] = True,
+        limit: int = 10
+    ) -> List[Announcement]:
+        """Get announcements for a club"""
+        try:
+            club_uuid = uuid.UUID(club_id)
+            query = db.query(Announcement).filter(Announcement.club_id == club_uuid)
+
+            if is_published is not None:
+                query = query.filter(Announcement.is_published == is_published)
+
+            return query.order_by(Announcement.created_at.desc()).limit(limit).all()
+        except ValueError:
+            return []
+
+    @staticmethod
+    def create_announcement(
+        db: Session,
+        announcement_data: AnnouncementCreate,
+        user_id: str
+    ) -> Announcement:
+        """Create a new announcement"""
+        # Verify club exists
+        club = ClubService.get_club_by_id(db, str(announcement_data.club_id))
+        if not club:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Club not found"
+            )
+
+        try:
+            user_uuid = uuid.UUID(user_id)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid user ID"
+            )
+
+        announcement = Announcement(
+            **announcement_data.model_dump(),
+            created_by=user_uuid
+        )
+        db.add(announcement)
+        db.commit()
+        db.refresh(announcement)
+
+        return announcement
+
+    @staticmethod
+    def update_announcement(
+        db: Session,
+        announcement_id: str,
+        announcement_data: AnnouncementUpdate
+    ) -> Optional[Announcement]:
+        """Update an announcement"""
+        announcement = AnnouncementService.get_announcement_by_id(db, announcement_id)
+        if not announcement:
+            return None
+
+        update_data = announcement_data.model_dump(exclude_unset=True)
+        for field, value in update_data.items():
+            setattr(announcement, field, value)
+
+        db.commit()
+        db.refresh(announcement)
+
+        return announcement
+
+    @staticmethod
+    def delete_announcement(db: Session, announcement_id: str) -> bool:
+        """Delete an announcement"""
+        announcement = AnnouncementService.get_announcement_by_id(db, announcement_id)
+        if not announcement:
+            return False
+
+        db.delete(announcement)
+        db.commit()
+
+        return True
+
+
+class GalleryService:
+    """Service for handling gallery/Instagram integration"""
+
+    @staticmethod
+    def get_gallery_settings_by_id(db: Session, settings_id: str) -> Optional[GallerySettings]:
+        """Get gallery settings by ID"""
+        try:
+            settings_uuid = uuid.UUID(settings_id)
+            return db.query(GallerySettings).filter(GallerySettings.id == settings_uuid).first()
+        except ValueError:
+            return None
+
+    @staticmethod
+    def get_gallery_settings_by_club_id(db: Session, club_id: str) -> Optional[GallerySettings]:
+        """Get gallery settings for a club"""
+        try:
+            club_uuid = uuid.UUID(club_id)
+            return db.query(GallerySettings).filter(GallerySettings.club_id == club_uuid).first()
+        except ValueError:
+            return None
+
+    @staticmethod
+    def create_or_update_gallery_settings(
+        db: Session,
+        club_id: str,
+        settings_data: GallerySettingsCreate | GallerySettingsUpdate
+    ) -> GallerySettings:
+        """Create or update gallery settings for a club"""
+        # Verify club exists
+        club = ClubService.get_club_by_id(db, club_id)
+        if not club:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Club not found"
+            )
+
+        # Check if settings already exist
+        existing_settings = GalleryService.get_gallery_settings_by_club_id(db, club_id)
+
+        if existing_settings:
+            # Update existing settings
+            update_data = settings_data.model_dump(exclude_unset=True)
+            for field, value in update_data.items():
+                if field != 'club_id':  # Don't update club_id
+                    setattr(existing_settings, field, value)
+
+            db.commit()
+            db.refresh(existing_settings)
+            return existing_settings
+        else:
+            # Create new settings
+            try:
+                club_uuid = uuid.UUID(club_id)
+            except ValueError:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid club ID"
+                )
+
+            settings = GallerySettings(
+                club_id=club_uuid,
+                **settings_data.model_dump(exclude={'club_id'})
+            )
+            db.add(settings)
+            db.commit()
+            db.refresh(settings)
+            return settings
+
+    @staticmethod
+    def update_cached_posts(
+        db: Session,
+        club_id: str,
+        posts_json: str
+    ) -> Optional[GallerySettings]:
+        """Update cached Instagram posts for a club"""
+        from datetime import datetime
+
+        settings = GalleryService.get_gallery_settings_by_club_id(db, club_id)
+        if not settings:
+            return None
+
+        settings.cached_posts = posts_json
+        settings.cache_updated_at = datetime.utcnow()
+
+        db.commit()
+        db.refresh(settings)
+
+        return settings
+
+
 # Create singleton instances
 club_service = ClubService()
 membership_service = MembershipService()
+announcement_service = AnnouncementService()
+gallery_service = GalleryService()

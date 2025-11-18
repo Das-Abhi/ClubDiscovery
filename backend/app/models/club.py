@@ -63,6 +63,8 @@ class Club(Base):
 
     # Relationships
     memberships = relationship("Membership", back_populates="club", cascade="all, delete-orphan")
+    announcements = relationship("Announcement", back_populates="club", cascade="all, delete-orphan")
+    gallery_settings = relationship("GallerySettings", back_populates="club", uselist=False, cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Club(id={self.id}, name={self.name}, category={self.category})>"
@@ -94,3 +96,63 @@ class Membership(Base):
 
     def __repr__(self):
         return f"<Membership(id={self.id}, user_id={self.user_id}, club_id={self.club_id}, role={self.role})>"
+
+
+class Announcement(Base):
+    """Announcement model for club announcements"""
+
+    __tablename__ = "announcements"
+
+    # Primary key
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+
+    # Foreign keys
+    club_id = Column(UUID(as_uuid=True), ForeignKey("clubs.id", ondelete="CASCADE"), nullable=False, index=True)
+    created_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+
+    # Announcement details
+    title = Column(String(255), nullable=False)
+    content = Column(Text, nullable=False)
+    is_published = Column(Boolean, default=True, nullable=False)
+
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    # Relationships
+    club = relationship("Club", back_populates="announcements")
+    author = relationship("User")
+
+    def __repr__(self):
+        return f"<Announcement(id={self.id}, club_id={self.club_id}, title={self.title})>"
+
+
+class GallerySettings(Base):
+    """Gallery settings model for club Instagram integration"""
+
+    __tablename__ = "gallery_settings"
+
+    # Primary key
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+
+    # Foreign keys (one-to-one with Club)
+    club_id = Column(UUID(as_uuid=True), ForeignKey("clubs.id", ondelete="CASCADE"), nullable=False, unique=True, index=True)
+
+    # Instagram settings
+    instagram_username = Column(String(255), nullable=True)
+    display_gallery = Column(Boolean, default=True, nullable=False)
+    max_posts = Column(Integer, default=4, nullable=False)  # Number of posts to display
+
+    # Cache for Instagram posts (JSON)
+    cached_posts = Column(Text, nullable=True)  # Store JSON string of posts
+    cache_updated_at = Column(DateTime, nullable=True)
+
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    # Relationships
+    club = relationship("Club", back_populates="gallery_settings")
+
+    def __repr__(self):
+        return f"<GallerySettings(id={self.id}, club_id={self.club_id}, instagram_username={self.instagram_username})>"

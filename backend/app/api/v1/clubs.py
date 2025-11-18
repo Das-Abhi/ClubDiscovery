@@ -14,10 +14,17 @@ from app.schemas.club import (
     ClubListResponse,
     MembershipCreate,
     MembershipResponse,
+    AnnouncementCreate,
+    AnnouncementUpdate,
+    AnnouncementResponse,
+    GallerySettingsCreate,
+    GallerySettingsUpdate,
+    GallerySettingsResponse,
 )
-from app.services.club_service import club_service, membership_service
+from app.services.club_service import club_service, membership_service, announcement_service, gallery_service
 from app.api.deps import get_current_user
 from app.models.user import User
+from app.middleware.admin import require_admin
 
 router = APIRouter()
 
@@ -238,3 +245,225 @@ async def leave_club(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Membership not found"
         )
+
+
+# Announcement endpoints
+
+@router.get("/{club_id}/announcements", response_model=List[AnnouncementResponse])
+async def get_club_announcements(
+    club_id: str,
+    is_published: Optional[bool] = Query(True, description="Filter by publication status"),
+    limit: int = Query(10, ge=1, le=50),
+    db: Session = Depends(get_db)
+):
+    """
+    Get announcements for a club
+
+    - **club_id**: UUID of the club
+    - **is_published**: Filter by publication status (default: true)
+    - **limit**: Maximum number of announcements to return (default: 10, max: 50)
+
+    Returns list of announcements
+    """
+    announcements = announcement_service.get_club_announcements(
+        db,
+        club_id,
+        is_published=is_published,
+        limit=limit
+    )
+    return [AnnouncementResponse.model_validate(a) for a in announcements]
+
+
+@router.post("/{club_id}/announcements", response_model=AnnouncementResponse, status_code=status.HTTP_201_CREATED)
+async def create_announcement(
+    club_id: str,
+    title: str,
+    content: str,
+    is_published: bool = True,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """
+    Create a new announcement for a club (Admin only)
+
+    Requires admin authentication.
+
+    - **club_id**: UUID of the club
+    - **title**: Announcement title
+    - **content**: Announcement content
+    - **is_published**: Publication status (default: true)
+
+    Returns created announcement
+    """
+    from uuid import UUID
+    announcement_data = AnnouncementCreate(
+        club_id=UUID(club_id),
+        title=title,
+        content=content,
+        is_published=is_published
+    )
+    announcement = announcement_service.create_announcement(
+        db,
+        announcement_data,
+        str(current_user.id)
+    )
+    return AnnouncementResponse.model_validate(announcement)
+
+
+@router.patch("/announcements/{announcement_id}", response_model=AnnouncementResponse)
+async def update_announcement(
+    announcement_id: str,
+    announcement_data: AnnouncementUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """
+    Update an announcement (Admin only)
+
+    Requires admin authentication.
+
+    - **announcement_id**: UUID of the announcement to update
+
+    Returns updated announcement
+    """
+    announcement = announcement_service.update_announcement(
+        db,
+        announcement_id,
+        announcement_data
+    )
+
+    if not announcement:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Announcement not found"
+        )
+
+    return AnnouncementResponse.model_validate(announcement)
+
+
+@router.delete("/announcements/{announcement_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_announcement(
+    announcement_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """
+    Delete an announcement (Admin only)
+
+    Requires admin authentication.
+
+    - **announcement_id**: UUID of the announcement to delete
+
+    Returns 204 No Content on success
+    """
+    success = announcement_service.delete_announcement(db, announcement_id)
+
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Announcement not found"
+        )
+
+
+# Gallery/Instagram endpoints
+
+@router.get("/{club_id}/gallery", response_model=GallerySettingsResponse)
+async def get_club_gallery(
+    club_id: str,
+    db: Session = Depends(get_db)
+):
+    """
+    Get gallery settings and cached posts for a club
+
+    - **club_id**: UUID of the club
+
+    Returns gallery settings with cached Instagram posts
+    """
+    settings = gallery_service.get_gallery_settings_by_club_id(db, club_id)
+
+    if not settings:
+        # Return empty settings if not configured
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Gallery settings not found for this club"
+        )
+
+    return GallerySettingsResponse.model_validate(settings)
+
+
+@router.post("/{club_id}/gallery", response_model=GallerySettingsResponse)
+async def create_or_update_gallery_settings(
+    club_id: str,
+    instagram_username: Optional[str] = None,
+    display_gallery: bool = True,
+    max_posts: int = 4,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """
+    Create or update gallery settings for a club (Admin only)
+
+    Requires admin authentication.
+
+    - **club_id**: UUID of the club
+    - **instagram_username**: Instagram username (without @)
+    - **display_gallery**: Whether to display the gallery (default: true)
+    - **max_posts**: Maximum number of posts to display (default: 4, max: 12)
+
+    Returns gallery settings
+    """
+    from uuid import UUID
+    settings_data = GallerySettingsUpdate(
+        instagram_username=instagram_username,
+        display_gallery=display_gallery,
+        max_posts=max_posts
+    )
+    settings = gallery_service.create_or_update_gallery_settings(
+        db,
+        club_id,
+        settings_data
+    )
+    return GallerySettingsResponse.model_validate(settings)
+
+
+@router.post("/{club_id}/gallery/refresh", response_model=GallerySettingsResponse)
+async def refresh_instagram_gallery(
+    club_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """
+    Refresh Instagram gallery cache for a club (Admin only)
+
+    This endpoint would integrate with Instagram Basic Display API
+    to fetch the latest posts. For now, it returns the current cached data.
+
+    Requires admin authentication.
+
+    - **club_id**: UUID of the club
+
+    Returns updated gallery settings with refreshed posts
+    """
+    settings = gallery_service.get_gallery_settings_by_club_id(db, club_id)
+
+    if not settings:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Gallery settings not found. Please configure gallery settings first."
+        )
+
+    if not settings.instagram_username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Instagram username not configured for this club"
+        )
+
+    # TODO: Implement Instagram API integration
+    # For now, return existing settings with a message
+    # In production, this would:
+    # 1. Call Instagram Basic Display API
+    # 2. Fetch recent posts
+    # 3. Update cached_posts field
+    # 4. Update cache_updated_at timestamp
+
+    return GallerySettingsResponse.model_validate(settings)

@@ -5,11 +5,12 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Users, Eye, Instagram, Linkedin, Twitter, Globe, Mail, Phone } from 'lucide-react'
+import { X, Users, Eye, Instagram, Linkedin, Twitter, Globe, Mail, Phone, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { clubsApi, type Club } from '@/lib/api/clubs'
+import Link from 'next/link'
 
 interface ClubModalProps {
   club: Club
@@ -71,17 +72,17 @@ export function ClubModal({ club, isOpen, onClose, onJoinLeave }: ClubModalProps
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+              className="w-full max-w-5xl max-h-[90vh] overflow-y-auto"
             >
-              <Card className="glass-card p-8 relative">
+              <Card className="glass-card p-8 pb-6 relative">
                 <button
                   onClick={onClose}
-                  className="absolute top-4 right-4 p-2 rounded-lg hover:bg-white/10 transition-colors"
+                  className="absolute top-6 right-6 p-2 rounded-lg hover:bg-white/10 transition-colors z-10"
                 >
                   <X className="w-6 h-6 text-gray-400 hover:text-white" />
                 </button>
 
-                <div className="flex items-start gap-6 mb-6">
+                <div className="flex items-start gap-6 mb-6 pr-12">
                   {club.logo_url ? (
                     <img src={club.logo_url} alt={club.name} className="w-24 h-24 rounded-lg object-cover" />
                   ) : (
@@ -215,6 +216,18 @@ export function ClubModal({ club, isOpen, onClose, onJoinLeave }: ClubModalProps
                     </p>
                   </div>
                 )}
+
+                <div className="mt-6 flex justify-center">
+                  <Link href={`/clubs/${club.slug}`}>
+                    <Button
+                      variant="outline"
+                      className="group border-red-500/30 hover:border-red-500 hover:bg-red-500/10"
+                    >
+                      Learn More
+                      <ExternalLink className="ml-2 w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </Button>
+                  </Link>
+                </div>
               </Card>
             </motion.div>
           </div>

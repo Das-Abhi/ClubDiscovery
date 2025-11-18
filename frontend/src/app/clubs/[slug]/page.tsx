@@ -20,6 +20,8 @@ import {
   UserCircle
 } from 'lucide-react'
 import { getInitials } from '@/lib/utils'
+import { ClubAnnouncements } from '@/components/clubs/ClubAnnouncements'
+import { ClubGallery } from '@/components/clubs/ClubGallery'
 
 export default function ClubDetailPage() {
   const params = useParams()
@@ -280,6 +282,12 @@ export default function ClubDetailPage() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Announcements */}
+            <ClubAnnouncements clubId={club.id} />
+
+            {/* Gallery */}
+            <ClubGallery clubId={club.id} instagramUsername={club.instagram} />
 
             {/* CTA Button */}
             <div className="flex gap-4">
