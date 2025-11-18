@@ -43,8 +43,7 @@ function AdminUsersContent() {
       filtered = filtered.filter(
         (u) =>
           u.full_name.toLowerCase().includes(query) ||
-          u.email.toLowerCase().includes(query) ||
-          u.university_id.toLowerCase().includes(query)
+          u.email.toLowerCase().includes(query)
       )
     }
 
@@ -165,7 +164,7 @@ function AdminUsersContent() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input
                   type="text"
-                  placeholder="Search users by name, email, or ID..."
+                  placeholder="Search users by name or email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -230,10 +229,6 @@ function AdminUsersContent() {
               <thead>
                 <tr className="border-b border-gray-700">
                   <th className="text-left p-4 text-sm font-semibold text-gray-300">User</th>
-                  <th className="text-left p-4 text-sm font-semibold text-gray-300">
-                    University ID
-                  </th>
-                  <th className="text-left p-4 text-sm font-semibold text-gray-300">Branch</th>
                   <th className="text-center p-4 text-sm font-semibold text-gray-300">Joined</th>
                   <th className="text-center p-4 text-sm font-semibold text-gray-300">Role</th>
                   <th className="text-center p-4 text-sm font-semibold text-gray-300">Status</th>
@@ -243,7 +238,7 @@ function AdminUsersContent() {
               <tbody>
                 {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center p-8 text-gray-400">
+                    <td colSpan={5} className="text-center p-8 text-gray-400">
                       No users found
                     </td>
                   </tr>
@@ -280,12 +275,6 @@ function AdminUsersContent() {
                           </div>
                         </div>
                       </td>
-
-                      {/* University ID */}
-                      <td className="p-4 text-gray-300">{u.university_id}</td>
-
-                      {/* Branch */}
-                      <td className="p-4 text-gray-300">{u.branch}</td>
 
                       {/* Joined Date */}
                       <td className="p-4 text-center text-gray-300">

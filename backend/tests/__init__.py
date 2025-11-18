@@ -1,0 +1,3 @@
+"""
+ClubCompass Backend Tests
+"""
