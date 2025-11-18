@@ -35,6 +35,9 @@ pytest==8.3.5
 pytest-asyncio==0.25.3
 pytest-cov==6.0.0
 
+# Monitoring & Logging
+sentry-sdk[fastapi]==2.19.2
+
 # Development
 black==25.11.0
 isort==6.1.0
