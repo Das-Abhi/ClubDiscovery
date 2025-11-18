@@ -7,52 +7,325 @@ from datetime import datetime
 import uuid
 
 from app.models.assessment import Assessment, Recommendation
+from app.models.club import Club
 from app.schemas.assessment import AssessmentCreate, AssessmentResult, ClubRecommendation, ReasoningItem
 
 
 class AssessmentService:
     """Service for handling assessment operations and recommendations"""
 
-    # Scoring weights for different response combinations
+    # Scoring weights for different response combinations (expanded for all major clubs)
     CLUB_SCORING_RULES = {
-        # Technical/Coding clubs
+        # Technical/Coding clubs - Co-Curricular
         "acm": {
             "enjoy": {"coding": 4, "designing": 2, "organizing": 1, "public_speaking": 1, "creative": 2},
             "domain": {"ai": 3, "robotics": 2, "web": 3, "electronics": 1, "management": 0},
             "impact": {"tech": 4, "social": 1, "cultural": 0, "entrepreneurship": 2},
             "past": {"coding": 3, "technical": 3, "cultural": 0, "sports": 0, "none": 1},
         },
-        "ieee": {
-            "enjoy": {"coding": 3, "designing": 2, "organizing": 1, "public_speaking": 1, "creative": 1},
-            "domain": {"ai": 2, "robotics": 3, "web": 2, "electronics": 4, "management": 0},
-            "impact": {"tech": 4, "social": 1, "cultural": 0, "entrepreneurship": 2},
-            "past": {"coding": 2, "technical": 4, "cultural": 0, "sports": 0, "none": 1},
+        "teamcodelocked": {
+            "enjoy": {"coding": 5, "designing": 2, "organizing": 1, "public_speaking": 1, "creative": 1},
+            "domain": {"ai": 2, "robotics": 1, "web": 3, "electronics": 1, "management": 0},
+            "impact": {"tech": 5, "social": 0, "cultural": 0, "entrepreneurship": 1},
+            "past": {"coding": 4, "technical": 3, "cultural": 0, "sports": 0, "none": 1},
         },
+        "gdscl": {
+            "enjoy": {"coding": 4, "designing": 3, "organizing": 2, "public_speaking": 2, "creative": 2},
+            "domain": {"ai": 3, "robotics": 1, "web": 4, "electronics": 1, "management": 1},
+            "impact": {"tech": 4, "social": 2, "cultural": 0, "entrepreneurship": 2},
+            "past": {"coding": 3, "technical": 3, "cultural": 0, "sports": 0, "none": 2},
+        },
+
+        # AI/ML/Data Science clubs
+        "augmentai": {
+            "enjoy": {"coding": 4, "designing": 2, "organizing": 1, "public_speaking": 1, "creative": 2},
+            "domain": {"ai": 5, "robotics": 2, "web": 2, "electronics": 1, "management": 1},
+            "impact": {"tech": 5, "social": 1, "cultural": 0, "entrepreneurship": 2},
+            "past": {"coding": 3, "technical": 4, "cultural": 0, "sports": 0, "none": 1},
+        },
+        "varaince": {
+            "enjoy": {"coding": 4, "designing": 2, "organizing": 1, "public_speaking": 1, "creative": 1},
+            "domain": {"ai": 5, "robotics": 1, "web": 2, "electronics": 1, "management": 1},
+            "impact": {"tech": 5, "social": 1, "cultural": 0, "entrepreneurship": 2},
+            "past": {"coding": 3, "technical": 4, "cultural": 0, "sports": 0, "none": 1},
+        },
+        "dsync": {
+            "enjoy": {"coding": 4, "designing": 1, "organizing": 1, "public_speaking": 1, "creative": 1},
+            "domain": {"ai": 5, "robotics": 1, "web": 3, "electronics": 1, "management": 1},
+            "impact": {"tech": 4, "social": 1, "cultural": 0, "entrepreneurship": 2},
+            "past": {"coding": 4, "technical": 3, "cultural": 0, "sports": 0, "none": 1},
+        },
+        "gradient": {
+            "enjoy": {"coding": 4, "designing": 2, "organizing": 1, "public_speaking": 1, "creative": 1},
+            "domain": {"ai": 5, "robotics": 2, "web": 2, "electronics": 1, "management": 1},
+            "impact": {"tech": 5, "social": 1, "cultural": 0, "entrepreneurship": 2},
+            "past": {"coding": 3, "technical": 4, "cultural": 0, "sports": 0, "none": 1},
+        },
+
+        # Robotics/Hardware/Aerospace clubs
         "robotics": {
             "enjoy": {"coding": 3, "designing": 4, "organizing": 1, "public_speaking": 0, "creative": 3},
             "domain": {"ai": 3, "robotics": 5, "web": 1, "electronics": 4, "management": 0},
             "impact": {"tech": 4, "social": 1, "cultural": 0, "entrepreneurship": 2},
             "past": {"coding": 2, "technical": 4, "cultural": 0, "sports": 0, "none": 1},
         },
-        # Cultural clubs
-        "dance": {
-            "enjoy": {"coding": 0, "designing": 2, "organizing": 1, "public_speaking": 2, "creative": 5},
-            "domain": {"ai": 0, "robotics": 0, "web": 0, "electronics": 0, "management": 2},
-            "impact": {"tech": 0, "social": 2, "cultural": 5, "entrepreneurship": 1},
-            "past": {"coding": 0, "technical": 0, "cultural": 5, "sports": 1, "none": 2},
+        "aquila": {
+            "enjoy": {"coding": 2, "designing": 4, "organizing": 1, "public_speaking": 1, "creative": 3},
+            "domain": {"ai": 1, "robotics": 5, "web": 0, "electronics": 3, "management": 1},
+            "impact": {"tech": 4, "social": 1, "cultural": 0, "entrepreneurship": 2},
+            "past": {"coding": 1, "technical": 4, "cultural": 0, "sports": 0, "none": 1},
         },
-        "music": {
-            "enjoy": {"coding": 0, "designing": 2, "organizing": 1, "public_speaking": 3, "creative": 5},
-            "domain": {"ai": 0, "robotics": 0, "web": 1, "electronics": 1, "management": 1},
-            "impact": {"tech": 0, "social": 2, "cultural": 5, "entrepreneurship": 1},
-            "past": {"coding": 0, "technical": 0, "cultural": 5, "sports": 0, "none": 2},
+        "aero": {
+            "enjoy": {"coding": 2, "designing": 4, "organizing": 1, "public_speaking": 1, "creative": 3},
+            "domain": {"ai": 1, "robotics": 5, "web": 0, "electronics": 3, "management": 1},
+            "impact": {"tech": 4, "social": 1, "cultural": 0, "entrepreneurship": 2},
+            "past": {"coding": 1, "technical": 4, "cultural": 0, "sports": 0, "none": 1},
         },
-        # Management/Entrepreneurship clubs
+        "rocketry": {
+            "enjoy": {"coding": 2, "designing": 5, "organizing": 1, "public_speaking": 1, "creative": 3},
+            "domain": {"ai": 1, "robotics": 4, "web": 0, "electronics": 3, "management": 1},
+            "impact": {"tech": 5, "social": 0, "cultural": 0, "entrepreneurship": 2},
+            "past": {"coding": 1, "technical": 5, "cultural": 0, "sports": 0, "none": 1},
+        },
+        "upagraha": {
+            "enjoy": {"coding": 3, "designing": 4, "organizing": 1, "public_speaking": 1, "creative": 2},
+            "domain": {"ai": 2, "robotics": 5, "web": 1, "electronics": 4, "management": 1},
+            "impact": {"tech": 5, "social": 1, "cultural": 0, "entrepreneurship": 2},
+            "past": {"coding": 2, "technical": 5, "cultural": 0, "sports": 0, "none": 1},
+        },
+        "bullz": {
+            "enjoy": {"coding": 1, "designing": 5, "organizing": 2, "public_speaking": 1, "creative": 3},
+            "domain": {"ai": 0, "robotics": 4, "web": 0, "electronics": 3, "management": 2},
+            "impact": {"tech": 4, "social": 1, "cultural": 0, "entrepreneurship": 3},
+            "past": {"coding": 1, "technical": 5, "cultural": 0, "sports": 2, "none": 1},
+        },
+
+        # IEEE clubs
+        "ieee-sb": {
+            "enjoy": {"coding": 3, "designing": 2, "organizing": 1, "public_speaking": 1, "creative": 1},
+            "domain": {"ai": 2, "robotics": 3, "web": 2, "electronics": 4, "management": 0},
+            "impact": {"tech": 4, "social": 1, "cultural": 0, "entrepreneurship": 2},
+            "past": {"coding": 2, "technical": 4, "cultural": 0, "sports": 0, "none": 1},
+        },
+        "ieee-cs": {
+            "enjoy": {"coding": 4, "designing": 2, "organizing": 1, "public_speaking": 1, "creative": 1},
+            "domain": {"ai": 3, "robotics": 2, "web": 4, "electronics": 2, "management": 0},
+            "impact": {"tech": 5, "social": 1, "cultural": 0, "entrepreneurship": 1},
+            "past": {"coding": 4, "technical": 3, "cultural": 0, "sports": 0, "none": 1},
+        },
+        "ieee-wie": {
+            "enjoy": {"coding": 3, "designing": 2, "organizing": 2, "public_speaking": 2, "creative": 1},
+            "domain": {"ai": 2, "robotics": 2, "web": 2, "electronics": 3, "management": 2},
+            "impact": {"tech": 3, "social": 3, "cultural": 1, "entrepreneurship": 2},
+            "past": {"coding": 2, "technical": 3, "cultural": 1, "sports": 0, "none": 2},
+        },
+        "ieee-pes": {
+            "enjoy": {"coding": 2, "designing": 3, "organizing": 1, "public_speaking": 1, "creative": 1},
+            "domain": {"ai": 1, "robotics": 2, "web": 1, "electronics": 5, "management": 1},
+            "impact": {"tech": 4, "social": 2, "cultural": 0, "entrepreneurship": 1},
+            "past": {"coding": 1, "technical": 4, "cultural": 0, "sports": 0, "none": 1},
+        },
+        "ieee-sps": {
+            "enjoy": {"coding": 3, "designing": 2, "organizing": 1, "public_speaking": 1, "creative": 1},
+            "domain": {"ai": 3, "robotics": 1, "web": 1, "electronics": 4, "management": 0},
+            "impact": {"tech": 4, "social": 1, "cultural": 0, "entrepreneurship": 1},
+            "past": {"coding": 2, "technical": 4, "cultural": 0, "sports": 0, "none": 1},
+        },
+
+        # Electronics & Engineering clubs
+        "elsoc": {
+            "enjoy": {"coding": 2, "designing": 4, "organizing": 1, "public_speaking": 1, "creative": 2},
+            "domain": {"ai": 2, "robotics": 3, "web": 1, "electronics": 5, "management": 0},
+            "impact": {"tech": 4, "social": 1, "cultural": 0, "entrepreneurship": 1},
+            "past": {"coding": 2, "technical": 4, "cultural": 0, "sports": 0, "none": 1},
+        },
+        "eeea": {
+            "enjoy": {"coding": 2, "designing": 3, "organizing": 1, "public_speaking": 1, "creative": 1},
+            "domain": {"ai": 1, "robotics": 2, "web": 1, "electronics": 5, "management": 1},
+            "impact": {"tech": 4, "social": 1, "cultural": 0, "entrepreneurship": 1},
+            "past": {"coding": 1, "technical": 4, "cultural": 0, "sports": 0, "none": 1},
+        },
+        "mea": {
+            "enjoy": {"coding": 1, "designing": 4, "organizing": 1, "public_speaking": 1, "creative": 2},
+            "domain": {"ai": 1, "robotics": 3, "web": 0, "electronics": 3, "management": 2},
+            "impact": {"tech": 4, "social": 1, "cultural": 0, "entrepreneurship": 2},
+            "past": {"coding": 1, "technical": 5, "cultural": 0, "sports": 0, "none": 1},
+        },
+
+        # Department clubs - CS/IS
+        "codeio": {
+            "enjoy": {"coding": 5, "designing": 3, "organizing": 1, "public_speaking": 1, "creative": 2},
+            "domain": {"ai": 3, "robotics": 1, "web": 4, "electronics": 1, "management": 1},
+            "impact": {"tech": 5, "social": 1, "cultural": 0, "entrepreneurship": 2},
+            "past": {"coding": 4, "technical": 3, "cultural": 0, "sports": 0, "none": 1},
+        },
+        "protocol": {
+            "enjoy": {"coding": 4, "designing": 2, "organizing": 2, "public_speaking": 2, "creative": 2},
+            "domain": {"ai": 2, "robotics": 1, "web": 3, "electronics": 1, "management": 1},
+            "impact": {"tech": 4, "social": 1, "cultural": 0, "entrepreneurship": 2},
+            "past": {"coding": 3, "technical": 3, "cultural": 0, "sports": 0, "none": 2},
+        },
+        "iseclub": {
+            "enjoy": {"coding": 4, "designing": 2, "organizing": 2, "public_speaking": 2, "creative": 2},
+            "domain": {"ai": 3, "robotics": 1, "web": 3, "electronics": 1, "management": 1},
+            "impact": {"tech": 4, "social": 2, "cultural": 1, "entrepreneurship": 2},
+            "past": {"coding": 3, "technical": 3, "cultural": 1, "sports": 0, "none": 2},
+        },
+
+        # Entrepreneurship clubs
         "edc": {
             "enjoy": {"coding": 1, "designing": 2, "organizing": 4, "public_speaking": 4, "creative": 3},
             "domain": {"ai": 1, "robotics": 0, "web": 2, "electronics": 0, "management": 5},
             "impact": {"tech": 2, "social": 2, "cultural": 1, "entrepreneurship": 5},
             "past": {"coding": 1, "technical": 1, "cultural": 1, "sports": 1, "none": 2},
+        },
+        "ciie": {
+            "enjoy": {"coding": 1, "designing": 2, "organizing": 4, "public_speaking": 4, "creative": 2},
+            "domain": {"ai": 2, "robotics": 0, "web": 2, "electronics": 0, "management": 5},
+            "impact": {"tech": 2, "social": 2, "cultural": 0, "entrepreneurship": 5},
+            "past": {"coding": 1, "technical": 1, "cultural": 0, "sports": 0, "none": 2},
+        },
+        "iic": {
+            "enjoy": {"coding": 1, "designing": 2, "organizing": 4, "public_speaking": 3, "creative": 2},
+            "domain": {"ai": 2, "robotics": 0, "web": 2, "electronics": 0, "management": 5},
+            "impact": {"tech": 2, "social": 2, "cultural": 0, "entrepreneurship": 5},
+            "past": {"coding": 1, "technical": 1, "cultural": 0, "sports": 0, "none": 2},
+        },
+        "business-insights": {
+            "enjoy": {"coding": 1, "designing": 1, "organizing": 4, "public_speaking": 4, "creative": 2},
+            "domain": {"ai": 1, "robotics": 0, "web": 1, "electronics": 0, "management": 5},
+            "impact": {"tech": 1, "social": 2, "cultural": 0, "entrepreneurship": 5},
+            "past": {"coding": 0, "technical": 1, "cultural": 1, "sports": 0, "none": 2},
+        },
+
+        # MedTech & Biotech
+        "corrtechs": {
+            "enjoy": {"coding": 2, "designing": 3, "organizing": 2, "public_speaking": 2, "creative": 2},
+            "domain": {"ai": 3, "robotics": 2, "web": 2, "electronics": 3, "management": 2},
+            "impact": {"tech": 4, "social": 4, "cultural": 0, "entrepreneurship": 3},
+            "past": {"coding": 2, "technical": 3, "cultural": 0, "sports": 0, "none": 2},
+        },
+        "synapse": {
+            "enjoy": {"coding": 1, "designing": 2, "organizing": 2, "public_speaking": 2, "creative": 2},
+            "domain": {"ai": 2, "robotics": 1, "web": 1, "electronics": 2, "management": 2},
+            "impact": {"tech": 3, "social": 3, "cultural": 1, "entrepreneurship": 2},
+            "past": {"coding": 1, "technical": 3, "cultural": 1, "sports": 0, "none": 2},
+        },
+
+        # Mathematics
+        "pentagram": {
+            "enjoy": {"coding": 3, "designing": 1, "organizing": 2, "public_speaking": 2, "creative": 2},
+            "domain": {"ai": 3, "robotics": 1, "web": 2, "electronics": 1, "management": 1},
+            "impact": {"tech": 3, "social": 1, "cultural": 1, "entrepreneurship": 1},
+            "past": {"coding": 3, "technical": 2, "cultural": 0, "sports": 0, "none": 2},
+        },
+
+        # Social/Service clubs
+        "nss": {
+            "enjoy": {"coding": 0, "designing": 1, "organizing": 4, "public_speaking": 3, "creative": 2},
+            "domain": {"ai": 0, "robotics": 0, "web": 0, "electronics": 0, "management": 3},
+            "impact": {"tech": 0, "social": 5, "cultural": 2, "entrepreneurship": 1},
+            "past": {"coding": 0, "technical": 0, "cultural": 2, "sports": 1, "none": 3},
+        },
+        "rotaract": {
+            "enjoy": {"coding": 0, "designing": 1, "organizing": 5, "public_speaking": 4, "creative": 2},
+            "domain": {"ai": 0, "robotics": 0, "web": 0, "electronics": 0, "management": 4},
+            "impact": {"tech": 0, "social": 5, "cultural": 2, "entrepreneurship": 2},
+            "past": {"coding": 0, "technical": 0, "cultural": 2, "sports": 1, "none": 3},
+        },
+        "leosatva": {
+            "enjoy": {"coding": 0, "designing": 1, "organizing": 4, "public_speaking": 4, "creative": 2},
+            "domain": {"ai": 0, "robotics": 0, "web": 0, "electronics": 0, "management": 3},
+            "impact": {"tech": 0, "social": 5, "cultural": 1, "entrepreneurship": 2},
+            "past": {"coding": 0, "technical": 0, "cultural": 1, "sports": 1, "none": 3},
+        },
+        "mountaineering": {
+            "enjoy": {"coding": 0, "designing": 1, "organizing": 2, "public_speaking": 1, "creative": 3},
+            "domain": {"ai": 0, "robotics": 0, "web": 0, "electronics": 0, "management": 1},
+            "impact": {"tech": 0, "social": 3, "cultural": 2, "entrepreneurship": 1},
+            "past": {"coding": 0, "technical": 0, "cultural": 1, "sports": 5, "none": 2},
+        },
+        "respawn": {
+            "enjoy": {"coding": 1, "designing": 2, "organizing": 3, "public_speaking": 1, "creative": 3},
+            "domain": {"ai": 1, "robotics": 0, "web": 1, "electronics": 0, "management": 2},
+            "impact": {"tech": 2, "social": 3, "cultural": 3, "entrepreneurship": 1},
+            "past": {"coding": 1, "technical": 1, "cultural": 2, "sports": 3, "none": 2},
+        },
+
+        # Cultural clubs - Music & Dance
+        "ninaad": {
+            "enjoy": {"coding": 0, "designing": 1, "organizing": 1, "public_speaking": 3, "creative": 5},
+            "domain": {"ai": 0, "robotics": 0, "web": 0, "electronics": 0, "management": 1},
+            "impact": {"tech": 0, "social": 2, "cultural": 5, "entrepreneurship": 0},
+            "past": {"coding": 0, "technical": 0, "cultural": 5, "sports": 0, "none": 2},
+        },
+        "groovehouse": {
+            "enjoy": {"coding": 0, "designing": 2, "organizing": 2, "public_speaking": 3, "creative": 5},
+            "domain": {"ai": 0, "robotics": 0, "web": 1, "electronics": 1, "management": 1},
+            "impact": {"tech": 0, "social": 2, "cultural": 5, "entrepreneurship": 1},
+            "past": {"coding": 0, "technical": 0, "cultural": 5, "sports": 0, "none": 2},
+        },
+        "paramvah": {
+            "enjoy": {"coding": 0, "designing": 2, "organizing": 1, "public_speaking": 2, "creative": 5},
+            "domain": {"ai": 0, "robotics": 0, "web": 0, "electronics": 0, "management": 1},
+            "impact": {"tech": 0, "social": 2, "cultural": 5, "entrepreneurship": 0},
+            "past": {"coding": 0, "technical": 0, "cultural": 5, "sports": 1, "none": 2},
+        },
+        "danzaddix": {
+            "enjoy": {"coding": 0, "designing": 2, "organizing": 1, "public_speaking": 2, "creative": 5},
+            "domain": {"ai": 0, "robotics": 0, "web": 0, "electronics": 0, "management": 1},
+            "impact": {"tech": 0, "social": 2, "cultural": 5, "entrepreneurship": 0},
+            "past": {"coding": 0, "technical": 0, "cultural": 5, "sports": 1, "none": 2},
+        },
+
+        # Cultural clubs - Arts & Literature
+        "inksanity": {
+            "enjoy": {"coding": 0, "designing": 1, "organizing": 2, "public_speaking": 5, "creative": 4},
+            "domain": {"ai": 0, "robotics": 0, "web": 1, "electronics": 0, "management": 2},
+            "impact": {"tech": 0, "social": 3, "cultural": 5, "entrepreneurship": 1},
+            "past": {"coding": 0, "technical": 0, "cultural": 5, "sports": 0, "none": 2},
+        },
+        "finearts": {
+            "enjoy": {"coding": 0, "designing": 3, "organizing": 1, "public_speaking": 1, "creative": 5},
+            "domain": {"ai": 0, "robotics": 0, "web": 1, "electronics": 0, "management": 0},
+            "impact": {"tech": 0, "social": 2, "cultural": 5, "entrepreneurship": 0},
+            "past": {"coding": 0, "technical": 0, "cultural": 5, "sports": 0, "none": 2},
+        },
+        "falcons": {
+            "enjoy": {"coding": 1, "designing": 4, "organizing": 2, "public_speaking": 1, "creative": 5},
+            "domain": {"ai": 1, "robotics": 1, "web": 2, "electronics": 1, "management": 1},
+            "impact": {"tech": 2, "social": 2, "cultural": 5, "entrepreneurship": 1},
+            "past": {"coding": 0, "technical": 1, "cultural": 4, "sports": 1, "none": 2},
+        },
+        "pravrutthi": {
+            "enjoy": {"coding": 0, "designing": 2, "organizing": 2, "public_speaking": 5, "creative": 5},
+            "domain": {"ai": 0, "robotics": 0, "web": 0, "electronics": 0, "management": 1},
+            "impact": {"tech": 0, "social": 3, "cultural": 5, "entrepreneurship": 0},
+            "past": {"coding": 0, "technical": 0, "cultural": 5, "sports": 0, "none": 2},
+        },
+        "panache": {
+            "enjoy": {"coding": 0, "designing": 4, "organizing": 3, "public_speaking": 2, "creative": 5},
+            "domain": {"ai": 0, "robotics": 0, "web": 1, "electronics": 0, "management": 2},
+            "impact": {"tech": 0, "social": 2, "cultural": 5, "entrepreneurship": 2},
+            "past": {"coding": 0, "technical": 0, "cultural": 5, "sports": 0, "none": 2},
+        },
+        "chiranthana": {
+            "enjoy": {"coding": 0, "designing": 1, "organizing": 2, "public_speaking": 3, "creative": 4},
+            "domain": {"ai": 0, "robotics": 0, "web": 0, "electronics": 0, "management": 1},
+            "impact": {"tech": 0, "social": 2, "cultural": 5, "entrepreneurship": 0},
+            "past": {"coding": 0, "technical": 0, "cultural": 5, "sports": 0, "none": 2},
+        },
+        "samskruthi": {
+            "enjoy": {"coding": 0, "designing": 2, "organizing": 2, "public_speaking": 3, "creative": 5},
+            "domain": {"ai": 0, "robotics": 0, "web": 0, "electronics": 0, "management": 1},
+            "impact": {"tech": 0, "social": 2, "cultural": 5, "entrepreneurship": 0},
+            "past": {"coding": 0, "technical": 0, "cultural": 5, "sports": 0, "none": 2},
+        },
+        "munsoc": {
+            "enjoy": {"coding": 0, "designing": 1, "organizing": 4, "public_speaking": 5, "creative": 2},
+            "domain": {"ai": 0, "robotics": 0, "web": 0, "electronics": 0, "management": 4},
+            "impact": {"tech": 0, "social": 4, "cultural": 3, "entrepreneurship": 2},
+            "past": {"coding": 0, "technical": 0, "cultural": 3, "sports": 0, "none": 2},
         },
     }
 
@@ -132,27 +405,40 @@ class AssessmentService:
         """
         Generate club recommendations based on assessment responses
 
-        For now, we'll use the sample clubs since we don't have clubs in DB yet
+        Now uses real clubs from the database with comprehensive scoring rules
         """
-        # Sample clubs data (hardcoded for now - will be replaced with DB query)
-        sample_clubs = [
-            {"id": "1", "name": "ACM Student Chapter", "slug": "acm", "tagline": "ACM student chapter — computing & AI", "logo_url": "/images/clubs/acm.jpg"},
-            {"id": "2", "name": "IEEE Student Branch", "slug": "ieee", "tagline": "Advancing technology for humanity", "logo_url": "/images/clubs/ieee.jpg"},
-            {"id": "3", "name": "Robotics Club", "slug": "robotics", "tagline": "Build the future", "logo_url": "/images/clubs/robotics.jpg"},
-            {"id": "4", "name": "Dance Club", "slug": "dance", "tagline": "Express through movement", "logo_url": "/images/clubs/dance.jpg"},
-            {"id": "5", "name": "Music Club", "slug": "music", "tagline": "Create harmony", "logo_url": "/images/clubs/music.jpg"},
-            {"id": "6", "name": "EDC", "slug": "edc", "tagline": "Entrepreneurship Development Cell", "logo_url": "/images/clubs/edc.jpg"},
-        ]
+        # Query all active clubs from the database
+        db_clubs = db.query(Club).filter(Club.is_active == True).all()
 
-        # Calculate scores for all clubs
+        # If no clubs in database, return empty list
+        if not db_clubs:
+            return []
+
+        # Convert database clubs to dict format and calculate scores
         scored_clubs = []
-        for club in sample_clubs:
-            score, reasoning = AssessmentService.calculate_club_score(club["slug"], responses)
-            scored_clubs.append({
-                "club": club,
-                "score": score,
-                "reasoning": reasoning
-            })
+        for db_club in db_clubs:
+            # Only calculate score if we have scoring rules for this club
+            if db_club.slug in AssessmentService.CLUB_SCORING_RULES:
+                score, reasoning = AssessmentService.calculate_club_score(db_club.slug, responses)
+
+                # Convert club to dict format expected by recommendation schema
+                club_dict = {
+                    "id": str(db_club.id),
+                    "name": db_club.name,
+                    "slug": db_club.slug,
+                    "tagline": db_club.tagline or "",
+                    "logo_url": db_club.logo_url or f"/images/clubs/{db_club.slug}.jpg"
+                }
+
+                scored_clubs.append({
+                    "club": club_dict,
+                    "score": score,
+                    "reasoning": reasoning
+                })
+
+        # If no clubs have scoring rules, return empty list
+        if not scored_clubs:
+            return []
 
         # Sort by score (descending) and assign ranks
         scored_clubs.sort(key=lambda x: x["score"], reverse=True)
