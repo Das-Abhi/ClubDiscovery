@@ -22,16 +22,22 @@ import {
 import { getInitials } from '@/lib/utils'
 import { ClubAnnouncements } from '@/components/clubs/ClubAnnouncements'
 import { ClubGallery } from '@/components/clubs/ClubGallery'
+import { useAuth } from '@/lib/hooks/useAuth'
 
 export default function ClubDetailPage() {
   const params = useParams()
   const router = useRouter()
   const slug = params.slug as string
+  const { isAuthenticated } = useAuth()
 
   const [club, setClub] = useState<Club | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [imageError, setImageError] = useState(false)
+  const [isMember, setIsMember] = useState(false)
+  const [isCheckingMembership, setIsCheckingMembership] = useState(true)
+  const [isMembershipLoading, setIsMembershipLoading] = useState(false)
+  const [membershipError, setMembershipError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchClub = async () => {
@@ -50,6 +56,56 @@ export default function ClubDetailPage() {
       fetchClub()
     }
   }, [slug])
+
+  // Check if user is already a member
+  useEffect(() => {
+    const checkMembership = async () => {
+      if (!isAuthenticated || !club) {
+        setIsCheckingMembership(false)
+        return
+      }
+
+      setIsCheckingMembership(true)
+      try {
+        const memberships = await clubsApi.getUserMemberships()
+        const isMemberOfClub = memberships.some((m) => m.club_id === club.id)
+        setIsMember(isMemberOfClub)
+      } catch (err) {
+        console.error('Failed to check membership:', err)
+        setIsMember(false)
+      } finally {
+        setIsCheckingMembership(false)
+      }
+    }
+
+    checkMembership()
+  }, [isAuthenticated, club])
+
+  const handleJoinLeave = async () => {
+    if (!isAuthenticated) {
+      router.push('/auth')
+      return
+    }
+
+    if (!club) return
+
+    setIsMembershipLoading(true)
+    setMembershipError(null)
+
+    try {
+      if (isMember) {
+        await clubsApi.leaveClub(club.id)
+        setIsMember(false)
+      } else {
+        await clubsApi.joinClub(club.id)
+        setIsMember(true)
+      }
+    } catch (err: any) {
+      setMembershipError(err.message || 'Failed to update membership')
+    } finally {
+      setIsMembershipLoading(false)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -289,14 +345,36 @@ export default function ClubDetailPage() {
             {/* Gallery */}
             <ClubGallery clubId={club.id} instagramUsername={club.instagram} />
 
+            {/* Membership Error */}
+            {membershipError && (
+              <Card className="glass-card">
+                <CardContent className="p-4 bg-red-500/10 border border-red-500/20">
+                  <p className="text-sm text-red-500">{membershipError}</p>
+                </CardContent>
+              </Card>
+            )}
+
             {/* CTA Button */}
             <div className="flex gap-4">
-              <Button
-                size="lg"
-                className="flex-1 bg-gradient-to-r from-red-900 to-red-700 hover:from-red-800 hover:to-red-600"
-              >
-                Join Club
-              </Button>
+              {isAuthenticated ? (
+                <Button
+                  size="lg"
+                  onClick={handleJoinLeave}
+                  disabled={isMembershipLoading || isCheckingMembership}
+                  variant={isMember ? 'outline' : 'default'}
+                  className={isMember ? 'flex-1' : 'flex-1 bg-gradient-to-r from-red-900 to-red-700 hover:from-red-800 hover:to-red-600'}
+                >
+                  {isCheckingMembership ? 'Checking...' : isMembershipLoading ? 'Loading...' : isMember ? 'Leave Club' : 'Join Club'}
+                </Button>
+              ) : (
+                <Button
+                  size="lg"
+                  onClick={() => router.push('/auth')}
+                  className="flex-1 bg-gradient-to-r from-red-900 to-red-700 hover:from-red-800 hover:to-red-600"
+                >
+                  Login to Join Club
+                </Button>
+              )}
               <Button
                 size="lg"
                 variant="outline"
