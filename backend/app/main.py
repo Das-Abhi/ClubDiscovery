@@ -5,9 +5,11 @@ Main application entry point
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
 from app.api.v1 import auth, clubs, users, assessment, admin
+from app.middleware.rate_limit import limiter, rate_limit_exceeded_handler
 
 # Create FastAPI application
 app = FastAPI(
@@ -18,6 +20,10 @@ app = FastAPI(
     redoc_url="/redoc",
     openapi_url="/openapi.json",
 )
+
+# Set up rate limiter state
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 
 # CORS Middleware
 app.add_middleware(
