@@ -177,7 +177,7 @@ export function ClubFormModal({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80">
       <Card className="glass-card w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Header */}
