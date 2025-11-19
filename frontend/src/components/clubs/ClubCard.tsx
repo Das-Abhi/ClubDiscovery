@@ -7,7 +7,9 @@ import { Club } from '@/lib/types/club'
 import { getInitials } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Highlight } from '@/components/ui/highlight'
-import { Users } from 'lucide-react'
+import { Users, Heart } from 'lucide-react'
+import { useFavorites } from '@/lib/hooks/useFavorites'
+import { useAuth } from '@/lib/hooks/useAuth'
 
 interface ClubCardProps {
   club: Club
@@ -18,6 +20,19 @@ interface ClubCardProps {
 
 export function ClubCard({ club, onClick, index = 0, searchQuery }: ClubCardProps) {
   const [imageError, setImageError] = useState(false)
+  const { isFavorited, toggleFavorite } = useFavorites()
+  const { user } = useAuth()
+  const isFav = user ? isFavorited(club.id) : false
+
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent card click
+    if (!user) {
+      // Redirect to login if not authenticated
+      window.location.href = '/auth/login'
+      return
+    }
+    await toggleFavorite(club.id, club.name)
+  }
 
   return (
     <motion.div
@@ -51,6 +66,23 @@ export function ClubCard({ club, onClick, index = 0, searchQuery }: ClubCardProp
 
             {/* Overlay Gradient */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+            {/* Favorite Button */}
+            <motion.button
+              onClick={handleFavoriteClick}
+              className="absolute top-3 left-3 p-2 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 hover:bg-black/70 transition-all duration-200 z-10"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
+            >
+              <Heart
+                className={`h-4 w-4 transition-all ${
+                  isFav
+                    ? 'fill-red-500 text-red-500'
+                    : 'text-white hover:text-red-400'
+                }`}
+              />
+            </motion.button>
 
             {/* Category Badge */}
             <div className="absolute top-3 right-3">

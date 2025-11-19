@@ -189,3 +189,26 @@ class GallerySettings(Base):
 
     def __repr__(self):
         return f"<GallerySettings(id={self.id}, club_id={self.club_id}, instagram_username={self.instagram_username})>"
+
+
+class Favorite(Base):
+    """Favorite model for user's favorited/bookmarked clubs"""
+
+    __tablename__ = "favorites"
+
+    # Primary key
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+
+    # Foreign keys
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    club_id = Column(UUID(as_uuid=True), ForeignKey("clubs.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    # Relationships
+    user = relationship("User", backref="favorites")
+    club = relationship("Club", backref="favorited_by")
+
+    def __repr__(self):
+        return f"<Favorite(id={self.id}, user_id={self.user_id}, club_id={self.club_id})>"
