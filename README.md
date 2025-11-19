@@ -181,18 +181,65 @@ pytest --cov=app       # Run with coverage
 
 ## 📦 Database
 
-### Running Migrations
+ClubCompass uses **PostgreSQL** for data storage and **Alembic** for database migrations.
+
+### Database Migrations (Alembic)
+
+We use Alembic for version-controlled database schema management. See [backend/MIGRATIONS.md](backend/MIGRATIONS.md) for comprehensive documentation.
+
+#### Quick Start
+
+```bash
+# Apply all pending migrations
+cd backend
+python manage_migrations.py upgrade
+
+# Check migration status
+python manage_migrations.py current
+
+# Create a new migration
+python manage_migrations.py create "Add new feature"
+```
+
+#### Using Makefile (if available)
 
 ```bash
 make db-migrate         # Run migrations
 make db-migration      # Create new migration
 ```
 
+#### First-Time Setup
+
+For existing databases:
+```bash
+cd backend
+python manage_migrations.py init  # Stamp current state
+```
+
+For new databases:
+```bash
+cd backend
+python init_db.py                  # Create initial schema
+python manage_migrations.py init   # Initialize Alembic
+```
+
 ### Database Access
 
 ```bash
-make shell-db          # Access PostgreSQL shell
+make shell-db          # Access PostgreSQL shell (via Docker)
+
+# Or directly
+psql -h localhost -U postgres -d clubcompass
 ```
+
+### Database Seeding
+
+```bash
+cd backend
+python seed_clubs.py   # Seed club data
+```
+
+📚 **Full Documentation**: [backend/MIGRATIONS.md](backend/MIGRATIONS.md)
 
 ## 🎨 Design System
 
@@ -248,17 +295,18 @@ We follow conventional commits:
 
 This project is being built in phases as outlined in [Plan.md](./Plan.md):
 
-- ✅ **Phase 0**: Project Setup & Infrastructure
-- 🚧 **Phase 1**: Core Frontend Structure
-- 📋 **Phase 2**: Club Directory Pages
-- 📋 **Phase 3**: Authentication System
-- 📋 **Phase 4**: Assessment & Recommendations
-- 📋 **Phase 5**: Backend API Development
-- 📋 **Phase 6**: Advanced Features
-- 📋 **Phase 7**: Admin Panel
-- 📋 **Phase 8**: Testing & QA
-- 📋 **Phase 9**: Deployment
-- 📋 **Phase 10**: Launch
+- ✅ **Phase 0**: Project Setup & Infrastructure (100% Complete - includes Alembic migrations)
+- ✅ **Phase 1**: Core Frontend Structure (92% Complete)
+- ✅ **Phase 2**: Club Directory Pages (95% Complete)
+- ⚠️ **Phase 3**: Authentication System (85% Complete)
+- ✅ **Phase 4**: Assessment & Recommendations (99% Complete)
+- ⚠️ **Phase 5**: Backend API Development (75% Complete)
+- ⚠️ **Phase 6**: Advanced Features (55% Complete)
+- ✅ **Phase 7**: Admin Panel (85% Complete)
+- ⚠️ **Phase 8**: Testing & QA (65% Complete)
+- ⚠️ **Phase 9**: Deployment & DevOps (85% Complete)
+
+📊 **Overall Completion: 83%** | 📋 See [FINAL_IMPLEMENTATION_ANALYSIS.md](./FINAL_IMPLEMENTATION_ANALYSIS.md) for detailed status
 
 ## 🐛 Troubleshooting
 

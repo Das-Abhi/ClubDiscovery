@@ -1,0 +1,135 @@
+# Alembic Migrations for ClubCompass
+
+This directory contains database migration scripts for the ClubCompass application.
+
+## Overview
+
+Alembic is a lightweight database migration tool for usage with SQLAlchemy. It provides a way to manage database schema changes in a version-controlled, repeatable manner.
+
+## Directory Structure
+
+```
+alembic/
+├── env.py              # Alembic environment configuration
+├── script.py.mako      # Template for generating migration scripts
+├── versions/           # Directory containing all migration scripts
+│   └── *.py           # Individual migration files
+└── README             # This file
+```
+
+## Usage
+
+### Prerequisites
+
+Ensure you have activated the virtual environment and installed dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+### Creating a New Migration
+
+To auto-generate a migration based on model changes:
+```bash
+cd backend
+alembic revision --autogenerate -m "Description of changes"
+```
+
+To create an empty migration (for data migrations or custom SQL):
+```bash
+cd backend
+alembic revision -m "Description of changes"
+```
+
+### Applying Migrations
+
+To upgrade to the latest migration:
+```bash
+cd backend
+alembic upgrade head
+```
+
+To upgrade to a specific revision:
+```bash
+alembic upgrade <revision_id>
+```
+
+### Rolling Back Migrations
+
+To downgrade one revision:
+```bash
+alembic downgrade -1
+```
+
+To downgrade to a specific revision:
+```bash
+alembic downgrade <revision_id>
+```
+
+To downgrade all migrations:
+```bash
+alembic downgrade base
+```
+
+### Viewing Migration History
+
+To see the current revision:
+```bash
+alembic current
+```
+
+To see migration history:
+```bash
+alembic history
+```
+
+To see the SQL that would be executed:
+```bash
+alembic upgrade head --sql
+```
+
+## Best Practices
+
+1. **Always review auto-generated migrations** - Alembic does its best, but complex changes may need manual adjustment
+
+2. **Test migrations on a copy of production data** before applying to production
+
+3. **Write reversible migrations** - Always implement both `upgrade()` and `downgrade()` functions
+
+4. **One logical change per migration** - Keep migrations focused and atomic
+
+5. **Add comments** - Explain complex migrations or data transformations
+
+6. **Backup database** before running migrations in production
+
+7. **Run migrations in a transaction** - This is the default behavior
+
+## Environment Configuration
+
+The database URL is automatically loaded from `app.core.config.settings.DATABASE_URL`, which reads from:
+- `.env` file in development
+- Environment variables in production
+
+## Integration with Existing Codebase
+
+This Alembic setup is configured to work with the existing SQLAlchemy models in:
+- `app/models/user.py`
+- `app/models/club.py`
+- `app/models/assessment.py`
+
+All models are automatically imported in `env.py` to ensure proper migration generation.
+
+## Troubleshooting
+
+### Issue: "Can't locate revision identified by..."
+Solution: Check that all migration files are present in `alembic/versions/` and that the revision chain is intact.
+
+### Issue: "Target database is not up to date"
+Solution: Run `alembic upgrade head` to apply pending migrations.
+
+### Issue: Autogenerate not detecting changes
+Solution: Ensure all models are imported in `alembic/env.py` and that you've saved your model changes.
+
+## Additional Resources
+
+- Alembic Documentation: https://alembic.sqlalchemy.org/
+- SQLAlchemy Documentation: https://docs.sqlalchemy.org/
