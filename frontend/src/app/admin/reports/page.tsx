@@ -15,12 +15,12 @@ import { reportsApi, type DetailedReport, type ReportStats } from '@/lib/api/rep
 
 function AdminReportsContent() {
   const router = useRouter()
-  const { user, loadUser } = useAuth()
+  const { user, isLoading: authLoading } = useAuth()
   const { toast } = useToast()
   const [reports, setReports] = useState<DetailedReport[]>([])
   const [filteredReports, setFilteredReports] = useState<DetailedReport[]>([])
   const [stats, setStats] = useState<ReportStats | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingReports, setIsLoadingReports] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [typeFilter, setTypeFilter] = useState<string>('all')
@@ -30,27 +30,25 @@ function AdminReportsContent() {
   const [isUpdating, setIsUpdating] = useState(false)
 
   useEffect(() => {
-    // Reload user data to get fresh is_admin status
-    loadUser()
-  }, [])
+    // Wait for auth to finish loading
+    if (authLoading) return
 
-  useEffect(() => {
-    if (user && !user.is_admin) {
+    // Check if user is admin
+    if (!user || !user.is_admin) {
       router.push('/')
       return
     }
-    if (user) {
-      loadReports()
-      loadStats()
-    }
-  }, [user, router])
+
+    loadReports()
+    loadStats()
+  }, [user, authLoading, router])
 
   useEffect(() => {
     filterReports()
   }, [reports, statusFilter, typeFilter])
 
   const loadReports = async () => {
-    setIsLoading(true)
+    setIsLoadingReports(true)
     setError(null)
     try {
       const data = await reportsApi.getAllReports(
@@ -61,7 +59,7 @@ function AdminReportsContent() {
     } catch (err: any) {
       setError(err.message || 'Failed to load reports')
     } finally {
-      setIsLoading(false)
+      setIsLoadingReports(false)
     }
   }
 
@@ -153,7 +151,7 @@ function AdminReportsContent() {
     }
   }
 
-  if (isLoading && reports.length === 0) {
+  if ((authLoading || isLoadingReports) && reports.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">

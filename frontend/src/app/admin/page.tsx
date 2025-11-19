@@ -15,31 +15,27 @@ import Link from 'next/link'
 
 function AdminDashboardContent() {
   const router = useRouter()
-  const { user, loadUser } = useAuth()
+  const { user, isLoading: authLoading } = useAuth()
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [activity, setActivity] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingStats, setIsLoadingStats] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Reload user data to get fresh is_admin status
-    loadUser()
-  }, [])
+    // Wait for auth to finish loading
+    if (authLoading) return
 
-  useEffect(() => {
     // Check if user is admin
-    if (user && !user.is_admin) {
+    if (!user || !user.is_admin) {
       router.push('/')
       return
     }
 
-    if (user) {
-      loadStats()
-    }
-  }, [user, router])
+    loadStats()
+  }, [user, authLoading, router])
 
   const loadStats = async () => {
-    setIsLoading(true)
+    setIsLoadingStats(true)
     try {
       const [statsData, activityData] = await Promise.all([
         adminApi.getDashboardStats(),
@@ -50,11 +46,11 @@ function AdminDashboardContent() {
     } catch (err: any) {
       setError(err.message || 'Failed to load dashboard statistics')
     } finally {
-      setIsLoading(false)
+      setIsLoadingStats(false)
     }
   }
 
-  if (isLoading) {
+  if (authLoading || isLoadingStats) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">

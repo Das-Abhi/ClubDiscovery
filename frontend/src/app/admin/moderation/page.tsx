@@ -15,11 +15,11 @@ import { adminApi, type AdminClub } from '@/lib/api/admin'
 
 function AdminModerationContent() {
   const router = useRouter()
-  const { user, loadUser } = useAuth()
+  const { user, isLoading: authLoading } = useAuth()
   const { toast } = useToast()
   const [pendingClubs, setPendingClubs] = useState<AdminClub[]>([])
   const [stats, setStats] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingData, setIsLoadingData] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedClub, setSelectedClub] = useState<AdminClub | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -29,23 +29,21 @@ function AdminModerationContent() {
   const [isProcessing, setIsProcessing] = useState(false)
 
   useEffect(() => {
-    // Reload user data to get fresh is_admin status
-    loadUser()
-  }, [])
+    // Wait for auth to finish loading
+    if (authLoading) return
 
-  useEffect(() => {
-    if (user && !user.is_admin) {
+    // Check if user is admin
+    if (!user || !user.is_admin) {
       router.push('/')
       return
     }
-    if (user) {
-      loadPendingClubs()
-      loadStats()
-    }
-  }, [user, router])
+
+    loadPendingClubs()
+    loadStats()
+  }, [user, authLoading, router])
 
   const loadPendingClubs = async () => {
-    setIsLoading(true)
+    setIsLoadingData(true)
     setError(null)
     try {
       const data = await adminApi.getPendingClubs()
@@ -53,7 +51,7 @@ function AdminModerationContent() {
     } catch (err: any) {
       setError(err.message || 'Failed to load pending clubs')
     } finally {
-      setIsLoading(false)
+      setIsLoadingData(false)
     }
   }
 
@@ -145,7 +143,7 @@ function AdminModerationContent() {
     }
   }
 
-  if (isLoading && pendingClubs.length === 0) {
+  if ((authLoading || isLoadingData) && pendingClubs.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">

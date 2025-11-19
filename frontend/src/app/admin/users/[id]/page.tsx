@@ -19,34 +19,33 @@ import type { Assessment } from '@/lib/types/assessment'
 function UserDetailContent() {
   const router = useRouter()
   const params = useParams()
-  const { user: currentUser, loadUser } = useAuth()
+  const { user: currentUser, isLoading: authLoading } = useAuth()
   const { toast } = useToast()
   const userId = params.id as string
 
   const [user, setUser] = useState<AdminUser | null>(null)
   const [assessments, setAssessments] = useState<Assessment[]>([])
   const [memberships, setMemberships] = useState<Membership[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingDetails, setIsLoadingDetails] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Reload user data to get fresh is_admin status
-    loadUser()
-  }, [])
+    // Wait for auth to finish loading
+    if (authLoading) return
 
-  useEffect(() => {
-    if (currentUser && !currentUser.is_admin) {
+    // Check if user is admin
+    if (!currentUser || !currentUser.is_admin) {
       router.push('/')
       return
     }
 
-    if (currentUser && userId) {
+    if (userId) {
       loadUserDetails()
     }
-  }, [currentUser, userId, router])
+  }, [currentUser, authLoading, userId, router])
 
   const loadUserDetails = async () => {
-    setIsLoading(true)
+    setIsLoadingDetails(true)
     setError(null)
 
     try {
@@ -74,7 +73,7 @@ function UserDetailContent() {
     } catch (err: any) {
       setError(err.message || 'Failed to load user details')
     } finally {
-      setIsLoading(false)
+      setIsLoadingDetails(false)
     }
   }
 
@@ -122,7 +121,7 @@ function UserDetailContent() {
     })
   }
 
-  if (isLoading) {
+  if (authLoading || isLoadingDetails) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">

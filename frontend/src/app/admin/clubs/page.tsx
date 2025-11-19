@@ -18,11 +18,11 @@ import { CSVImportModal } from '@/components/admin/CSVImportModal'
 
 function AdminClubsContent() {
   const router = useRouter()
-  const { user, loadUser } = useAuth()
+  const { user, isLoading: authLoading } = useAuth()
   const { toast } = useToast()
   const [clubs, setClubs] = useState<AdminClub[]>([])
   const [filteredClubs, setFilteredClubs] = useState<AdminClub[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingClubs, setIsLoadingClubs] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
@@ -33,21 +33,17 @@ function AdminClubsContent() {
   const [isCSVImportOpen, setIsCSVImportOpen] = useState(false)
 
   useEffect(() => {
-    // Reload user data to get fresh is_admin status
-    loadUser()
-  }, [])
+    // Wait for auth to finish loading
+    if (authLoading) return
 
-  useEffect(() => {
     // Check if user is admin
-    if (user && !user.is_admin) {
+    if (!user || !user.is_admin) {
       router.push('/')
       return
     }
 
-    if (user) {
-      loadClubs()
-    }
-  }, [user, router])
+    loadClubs()
+  }, [user, authLoading, router])
 
   useEffect(() => {
     // Filter clubs based on search and filters
@@ -77,7 +73,7 @@ function AdminClubsContent() {
   }, [clubs, searchQuery, categoryFilter, statusFilter])
 
   const loadClubs = async () => {
-    setIsLoading(true)
+    setIsLoadingClubs(true)
     setError(null)
     try {
       const data = await adminApi.getClubs()
@@ -86,7 +82,7 @@ function AdminClubsContent() {
     } catch (err: any) {
       setError(err.message || 'Failed to load clubs')
     } finally {
-      setIsLoading(false)
+      setIsLoadingClubs(false)
     }
   }
 
@@ -166,7 +162,7 @@ function AdminClubsContent() {
     }
   }
 
-  if (isLoading) {
+  if (authLoading || isLoadingClubs) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
