@@ -8,8 +8,12 @@ from fastapi.middleware.gzip import GZipMiddleware
 from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
+from app.core.sentry import init_sentry
 from app.api.v1 import auth, clubs, users, assessment, admin, favorites, reports
 from app.middleware.rate_limit import limiter, rate_limit_exceeded_handler
+
+# Initialize Sentry for error tracking and monitoring
+init_sentry()
 
 # Create FastAPI application
 app = FastAPI(
