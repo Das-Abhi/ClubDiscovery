@@ -3,7 +3,7 @@
  */
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Users, Eye, Instagram, Linkedin, Twitter, Globe, Mail, Phone, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -23,7 +23,32 @@ export function ClubModal({ club, isOpen, onClose, onJoinLeave }: ClubModalProps
   const { isAuthenticated } = useAuth()
   const [isMember, setIsMember] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isCheckingMembership, setIsCheckingMembership] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Check if user is already a member when modal opens
+  useEffect(() => {
+    const checkMembership = async () => {
+      if (!isAuthenticated || !isOpen) {
+        setIsCheckingMembership(false)
+        return
+      }
+
+      setIsCheckingMembership(true)
+      try {
+        const memberships = await clubsApi.getUserMemberships()
+        const isMemberOfClub = memberships.some((m) => m.club_id === club.id)
+        setIsMember(isMemberOfClub)
+      } catch (err) {
+        console.error('Failed to check membership:', err)
+        setIsMember(false)
+      } finally {
+        setIsCheckingMembership(false)
+      }
+    }
+
+    checkMembership()
+  }, [isAuthenticated, isOpen, club.id])
 
   const handleJoinLeave = async () => {
     if (!isAuthenticated) {
@@ -109,11 +134,11 @@ export function ClubModal({ club, isOpen, onClose, onJoinLeave }: ClubModalProps
                   {isAuthenticated && (
                     <Button
                       onClick={handleJoinLeave}
-                      disabled={isLoading}
+                      disabled={isLoading || isCheckingMembership}
                       variant={isMember ? 'outline' : 'default'}
                       className={isMember ? '' : 'bg-gradient-to-r from-red-600 to-red-500'}
                     >
-                      {isLoading ? 'Loading...' : isMember ? 'Leave Club' : 'Join Club'}
+                      {isCheckingMembership ? 'Checking...' : isLoading ? 'Loading...' : isMember ? 'Leave Club' : 'Join Club'}
                     </Button>
                   )}
                 </div>
