@@ -27,7 +27,7 @@ function SearchPageContent() {
     const fetchClubs = async () => {
       try {
         setIsLoading(true)
-        const response = await clubsApi.getClubs()
+        const response = await clubsApi.getClubs({ per_page: 100 })
         setClubs(response.clubs)
       } catch (err: any) {
         setError(err.message || 'Failed to load clubs')
