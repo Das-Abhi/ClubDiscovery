@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Building2, Search, Star, Eye, EyeOff, Trash2, RefreshCw, Plus, Edit } from 'lucide-react'
+import { Building2, Search, Star, Eye, EyeOff, Trash2, RefreshCw, Plus, Edit, Upload } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,6 +14,7 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { useToast } from '@/lib/hooks/useToast'
 import { adminApi, type AdminClub } from '@/lib/api/admin'
 import { ClubFormModal, type ClubFormData } from '@/components/admin/ClubFormModal'
+import { CSVImportModal } from '@/components/admin/CSVImportModal'
 
 function AdminClubsContent() {
   const router = useRouter()
@@ -29,6 +30,7 @@ function AdminClubsContent() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [selectedClub, setSelectedClub] = useState<AdminClub | null>(null)
+  const [isCSVImportOpen, setIsCSVImportOpen] = useState(false)
 
   useEffect(() => {
     // Check if user is admin
@@ -193,6 +195,10 @@ function AdminClubsContent() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <Button onClick={() => setIsCSVImportOpen(true)} variant="glass">
+              <Upload className="w-4 h-4 mr-2" />
+              Import CSV
+            </Button>
             <Button onClick={handleOpenCreateModal} variant="glass">
               <Plus className="w-4 h-4 mr-2" />
               Create Club
@@ -440,6 +446,17 @@ function AdminClubsContent() {
           onSubmit={handleSubmitClub}
           initialData={selectedClub || undefined}
           mode={modalMode}
+        />
+
+        {/* CSV Import Modal */}
+        <CSVImportModal
+          isOpen={isCSVImportOpen}
+          onClose={() => setIsCSVImportOpen(false)}
+          onSuccess={() => {
+            setIsCSVImportOpen(false)
+            loadClubs()
+            toast.success('Clubs imported successfully', 'Success')
+          }}
         />
       </div>
     </div>
