@@ -1,16 +1,19 @@
 """
 Admin API endpoints
 """
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 from typing import List
 from datetime import datetime, timedelta
+import pandas as pd
+import io
+from slugify import slugify
 
 from app.api.deps import get_db
 from app.middleware.admin import require_admin
 from app.models.user import User
-from app.models.club import Club, Membership
+from app.models.club import Club, Membership, ApprovalStatus
 from app.models.assessment import Assessment
 from app.schemas.user import UserResponse
 from app.schemas.club import ClubResponse
@@ -343,3 +346,280 @@ async def get_recent_activity(
     activity.sort(key=lambda x: x["timestamp"], reverse=True)
 
     return activity[:limit]
+
+
+# Content Moderation Endpoints
+@router.get("/moderation/pending-clubs", response_model=List[ClubResponse])
+async def get_pending_clubs(
+    skip: int = 0,
+    limit: int = 50,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(require_admin)
+):
+    """Get list of clubs pending approval (admin only)"""
+    clubs = (
+        db.query(Club)
+        .filter(Club.approval_status == ApprovalStatus.PENDING)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+    return clubs
+
+
+@router.patch("/moderation/clubs/{club_id}/approve")
+async def approve_club(
+    club_id: str,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(require_admin)
+):
+    """Approve a pending club (admin only)"""
+    club = db.query(Club).filter(Club.id == club_id).first()
+    if not club:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Club not found"
+        )
+
+    club.approval_status = ApprovalStatus.APPROVED
+    club.is_active = True
+    club.rejection_reason = None
+    db.commit()
+    db.refresh(club)
+
+    return {
+        "id": str(club.id),
+        "name": club.name,
+        "approval_status": club.approval_status.value,
+        "message": f"Club '{club.name}' has been approved"
+    }
+
+
+@router.patch("/moderation/clubs/{club_id}/reject")
+async def reject_club(
+    club_id: str,
+    reason: str,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(require_admin)
+):
+    """Reject a pending club with reason (admin only)"""
+    club = db.query(Club).filter(Club.id == club_id).first()
+    if not club:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Club not found"
+        )
+
+    club.approval_status = ApprovalStatus.REJECTED
+    club.is_active = False
+    club.rejection_reason = reason
+    db.commit()
+    db.refresh(club)
+
+    return {
+        "id": str(club.id),
+        "name": club.name,
+        "approval_status": club.approval_status.value,
+        "rejection_reason": club.rejection_reason,
+        "message": f"Club '{club.name}' has been rejected"
+    }
+
+
+@router.patch("/moderation/clubs/{club_id}/request-revision")
+async def request_revision(
+    club_id: str,
+    feedback: str,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(require_admin)
+):
+    """Request revisions for a club (admin only)"""
+    club = db.query(Club).filter(Club.id == club_id).first()
+    if not club:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Club not found"
+        )
+
+    club.approval_status = ApprovalStatus.NEEDS_REVISION
+    club.rejection_reason = feedback
+    db.commit()
+    db.refresh(club)
+
+    return {
+        "id": str(club.id),
+        "name": club.name,
+        "approval_status": club.approval_status.value,
+        "feedback": club.rejection_reason,
+        "message": f"Revision requested for club '{club.name}'"
+    }
+
+
+@router.get("/moderation/stats")
+async def get_moderation_stats(
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(require_admin)
+):
+    """Get moderation statistics (admin only)"""
+    pending_count = db.query(Club).filter(Club.approval_status == ApprovalStatus.PENDING).count()
+    approved_count = db.query(Club).filter(Club.approval_status == ApprovalStatus.APPROVED).count()
+    rejected_count = db.query(Club).filter(Club.approval_status == ApprovalStatus.REJECTED).count()
+    needs_revision_count = db.query(Club).filter(Club.approval_status == ApprovalStatus.NEEDS_REVISION).count()
+
+    return {
+        "pending": pending_count,
+        "approved": approved_count,
+        "rejected": rejected_count,
+        "needs_revision": needs_revision_count,
+        "total": pending_count + approved_count + rejected_count + needs_revision_count
+    }
+
+
+# CSV Bulk Import
+@router.post("/clubs/bulk-import")
+async def bulk_import_clubs(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(require_admin)
+):
+    """
+    Bulk import clubs from CSV file (admin only)
+
+    Required CSV columns:
+    - name: Club name (required)
+    - category: cocurricular, extracurricular, or department (required)
+    - tagline: Short description
+    - description: Full description
+    - overview: Overview text
+    - logo_url: URL to club logo
+    - instagram: Instagram handle
+    - faculty_name: Faculty coordinator name
+    - faculty_email: Faculty email
+    - faculty_phone: Faculty phone
+
+    Optional columns: linkedin, twitter, website, cover_image_url, subcategory
+    """
+    # Validate file type
+    if not file.filename.endswith('.csv'):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File must be a CSV file"
+        )
+
+    try:
+        # Read CSV file
+        contents = await file.read()
+        df = pd.read_csv(io.BytesIO(contents))
+
+        # Validate required columns
+        required_columns = ['name', 'category']
+        missing_columns = [col for col in required_columns if col not in df.columns]
+        if missing_columns:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Missing required columns: {', '.join(missing_columns)}"
+            )
+
+        created_clubs = []
+        skipped_clubs = []
+        errors = []
+
+        # Process each row
+        for index, row in df.iterrows():
+            try:
+                # Generate slug from name
+                club_slug = slugify(row['name'])
+
+                # Check if club already exists
+                existing_club = db.query(Club).filter(
+                    (Club.name == row['name']) | (Club.slug == club_slug)
+                ).first()
+
+                if existing_club:
+                    skipped_clubs.append({
+                        "row": index + 1,
+                        "name": row['name'],
+                        "reason": "Club already exists"
+                    })
+                    continue
+
+                # Validate category
+                category_value = str(row['category']).lower()
+                if category_value not in ['cocurricular', 'extracurricular', 'department']:
+                    errors.append({
+                        "row": index + 1,
+                        "name": row['name'],
+                        "error": f"Invalid category: {row['category']}"
+                    })
+                    continue
+
+                # Create new club
+                new_club = Club(
+                    name=row['name'],
+                    slug=club_slug,
+                    category=category_value,
+                    tagline=str(row.get('tagline', '')).strip() if pd.notna(row.get('tagline')) else None,
+                    description=str(row.get('description', '')).strip() if pd.notna(row.get('description')) else None,
+                    overview=str(row.get('overview', '')).strip() if pd.notna(row.get('overview')) else None,
+                    logo_url=str(row.get('logo_url', '')).strip() if pd.notna(row.get('logo_url')) else None,
+                    cover_image_url=str(row.get('cover_image_url', '')).strip() if pd.notna(row.get('cover_image_url')) else None,
+                    instagram=str(row.get('instagram', '')).strip() if pd.notna(row.get('instagram')) else None,
+                    linkedin=str(row.get('linkedin', '')).strip() if pd.notna(row.get('linkedin')) else None,
+                    twitter=str(row.get('twitter', '')).strip() if pd.notna(row.get('twitter')) else None,
+                    website=str(row.get('website', '')).strip() if pd.notna(row.get('website')) else None,
+                    faculty_name=str(row.get('faculty_name', '')).strip() if pd.notna(row.get('faculty_name')) else None,
+                    faculty_email=str(row.get('faculty_email', '')).strip() if pd.notna(row.get('faculty_email')) else None,
+                    faculty_phone=str(row.get('faculty_phone', '')).strip() if pd.notna(row.get('faculty_phone')) else None,
+                    subcategory=str(row.get('subcategory', '')).strip() if pd.notna(row.get('subcategory')) else None,
+                    is_active=True,
+                    approval_status=ApprovalStatus.APPROVED,  # Auto-approve CSV imports
+                    member_count=0,
+                    view_count=0
+                )
+
+                db.add(new_club)
+                created_clubs.append({
+                    "row": index + 1,
+                    "name": row['name'],
+                    "slug": club_slug
+                })
+
+            except Exception as e:
+                errors.append({
+                    "row": index + 1,
+                    "name": row.get('name', 'Unknown'),
+                    "error": str(e)
+                })
+
+        # Commit all changes
+        if created_clubs:
+            db.commit()
+
+        return {
+            "success": True,
+            "summary": {
+                "total_rows": len(df),
+                "created": len(created_clubs),
+                "skipped": len(skipped_clubs),
+                "errors": len(errors)
+            },
+            "created_clubs": created_clubs,
+            "skipped_clubs": skipped_clubs,
+            "errors": errors
+        }
+
+    except pd.errors.EmptyDataError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="CSV file is empty"
+        )
+    except pd.errors.ParserError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid CSV format"
+        )
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error processing CSV: {str(e)}"
+        )

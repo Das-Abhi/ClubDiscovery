@@ -3,7 +3,7 @@ Initialize database tables
 Run this script to create all database tables
 """
 from app.database import engine, Base
-from app.models import User, Assessment, Recommendation, Club, Membership, Announcement, GallerySettings, Favorite
+from app.models import User, Assessment, Recommendation, Club, Membership, Announcement, GallerySettings, Favorite, UserReport
 
 
 def init_db():
@@ -12,11 +12,12 @@ def init_db():
     print("- Users table (with auth tokens)")
     print("- Assessments table")
     print("- Recommendations table")
-    print("- Clubs table")
+    print("- Clubs table (with approval status)")
     print("- Memberships table")
     print("- Announcements table")
     print("- Gallery Settings table")
     print("- Favorites table")
+    print("- User Reports table (Phase 7)")
 
     Base.metadata.create_all(bind=engine)
 
@@ -63,11 +64,12 @@ def init_db():
     print("  • users (includes password reset & email verification tokens)")
     print("  • assessments")
     print("  • recommendations")
-    print("  • clubs (with Full-Text Search index)")
+    print("  • clubs (with Full-Text Search index & approval status)")
     print("  • memberships")
     print("  • announcements")
     print("  • gallery_settings")
     print("  • favorites (Phase 6)")
+    print("  • user_reports (Phase 7)")
     print("\n📝 Phase 3 features:")
     print("  - reset_password_token")
     print("  - reset_password_token_expires")
@@ -80,6 +82,11 @@ def init_db():
     print("\n⭐ Phase 6 features:")
     print("  - Favorites/bookmarking system")
     print("  - User can favorite/bookmark clubs for quick access")
+    print("\n🔧 Phase 7 features:")
+    print("  - Content moderation workflow (approval_status field)")
+    print("  - User reports system (report users, clubs, content)")
+    print("  - CSV bulk import for clubs")
+    print("  - Admin moderation endpoints (approve/reject/request revision)")
 
 
 if __name__ == "__main__":
