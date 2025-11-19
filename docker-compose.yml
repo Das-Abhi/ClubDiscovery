@@ -57,7 +57,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: bash /app/start.sh
+    command: python startup.py
 
   # Next.js Frontend
   frontend:
