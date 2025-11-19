@@ -307,7 +307,7 @@ function ProfileContent() {
                       </div>
                       {membership.club && (
                         <Button
-                          onClick={() => router.push(`/clubs/${membership.club?.category}`)}
+                          onClick={() => router.push(`/clubs/${membership.club?.slug}`)}
                           variant="outline"
                           size="sm"
                         >
