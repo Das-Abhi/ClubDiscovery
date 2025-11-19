@@ -8,7 +8,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
-from app.api.v1 import auth, clubs, users, assessment, admin, favorites
+from app.api.v1 import auth, clubs, users, assessment, admin, favorites, reports
 from app.middleware.rate_limit import limiter, rate_limit_exceeded_handler
 
 # Create FastAPI application
@@ -66,6 +66,7 @@ app.include_router(clubs.router, prefix="/api/v1/clubs", tags=["Clubs"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
 app.include_router(assessment.router, prefix="/api/v1/assessments", tags=["Assessment"])
 app.include_router(favorites.router, prefix="/api/v1/favorites", tags=["Favorites"])
+app.include_router(reports.router, prefix="/api/v1", tags=["Reports"])
 app.include_router(admin.router, prefix="/api/v1", tags=["Admin"])
 
 

@@ -226,5 +226,76 @@ export const adminApi = {
     } catch (error) {
       return handleApiError(error)
     }
+  },
+
+  // Moderation APIs
+  /**
+   * Get pending clubs for moderation
+   */
+  getPendingClubs: async (skip: number = 0, limit: number = 50): Promise<AdminClub[]> => {
+    try {
+      const response = await apiClient.get<AdminClub[]>('/admin/moderation/pending-clubs', {
+        params: { skip, limit }
+      })
+      return response.data
+    } catch (error) {
+      return handleApiError(error)
+    }
+  },
+
+  /**
+   * Approve a club
+   */
+  approveClub: async (clubId: string): Promise<any> => {
+    try {
+      const response = await apiClient.patch(`/admin/moderation/clubs/${clubId}/approve`)
+      return response.data
+    } catch (error) {
+      return handleApiError(error)
+    }
+  },
+
+  /**
+   * Reject a club
+   */
+  rejectClub: async (clubId: string, reason: string): Promise<any> => {
+    try {
+      const response = await apiClient.patch(
+        `/admin/moderation/clubs/${clubId}/reject`,
+        null,
+        { params: { reason } }
+      )
+      return response.data
+    } catch (error) {
+      return handleApiError(error)
+    }
+  },
+
+  /**
+   * Request revision for a club
+   */
+  requestRevision: async (clubId: string, feedback: string): Promise<any> => {
+    try {
+      const response = await apiClient.patch(
+        `/admin/moderation/clubs/${clubId}/request-revision`,
+        null,
+        { params: { feedback } }
+      )
+      return response.data
+    } catch (error) {
+      return handleApiError(error)
+    }
+  },
+
+  /**
+   * Get moderation statistics
+   */
+  getModerationStats: async (): Promise<any> => {
+    try {
+      const response = await apiClient.get('/admin/moderation/stats')
+      return response.data
+    } catch (error) {
+      return handleApiError(error)
+    }
   }
 }

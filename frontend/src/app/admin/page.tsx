@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Users, Building2, TrendingUp, ClipboardList, Star, Activity } from 'lucide-react'
+import { Users, Building2, TrendingUp, ClipboardList, Star, Activity, AlertCircle, Shield } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/auth/AuthGuard'
@@ -17,6 +17,7 @@ function AdminDashboardContent() {
   const router = useRouter()
   const { user } = useAuth()
   const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [activity, setActivity] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -33,8 +34,12 @@ function AdminDashboardContent() {
   const loadStats = async () => {
     setIsLoading(true)
     try {
-      const data = await adminApi.getDashboardStats()
-      setStats(data)
+      const [statsData, activityData] = await Promise.all([
+        adminApi.getDashboardStats(),
+        adminApi.getRecentActivity(10)
+      ])
+      setStats(statsData)
+      setActivity(activityData)
     } catch (err: any) {
       setError(err.message || 'Failed to load dashboard statistics')
     } finally {
@@ -134,7 +139,7 @@ function AdminDashboardContent() {
           </Card>
         </div>
 
-        {/* Popular Clubs */}
+        {/* Popular Clubs & Category Distribution */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <Card className="glass-card p-6">
             <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
@@ -186,10 +191,64 @@ function AdminDashboardContent() {
           </Card>
         </div>
 
+        {/* Recent Activity */}
+        <Card className="glass-card p-6 mb-8">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <Activity className="w-5 h-5 text-blue-500" />
+            Recent Activity
+          </h2>
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {activity.length > 0 ? (
+              activity.map((item, index) => (
+                <div
+                  key={index}
+                  className="flex items-start gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                >
+                  <div className="flex-shrink-0 mt-1">
+                    {item.type === 'user_registered' && (
+                      <Users className="w-4 h-4 text-blue-400" />
+                    )}
+                    {item.type === 'club_created' && (
+                      <Building2 className="w-4 h-4 text-green-400" />
+                    )}
+                    {item.type === 'club_joined' && (
+                      <TrendingUp className="w-4 h-4 text-purple-400" />
+                    )}
+                    {item.type === 'assessment_completed' && (
+                      <ClipboardList className="w-4 h-4 text-orange-400" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm">{item.description}</p>
+                    {item.user_email && (
+                      <p className="text-gray-400 text-xs mt-1">{item.user_email}</p>
+                    )}
+                    {item.club_name && (
+                      <p className="text-gray-400 text-xs mt-1">{item.club_name}</p>
+                    )}
+                  </div>
+                  <div className="flex-shrink-0">
+                    <p className="text-gray-400 text-xs">
+                      {new Date(item.timestamp).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-400 text-center py-8">No recent activity</p>
+            )}
+          </div>
+        </Card>
+
         {/* Quick Actions */}
         <Card className="glass-card p-6">
           <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <Link href="/admin/users">
               <Button className="w-full bg-blue-600 hover:bg-blue-700">
                 <Users className="w-4 h-4 mr-2" />
@@ -202,8 +261,20 @@ function AdminDashboardContent() {
                 Manage Clubs
               </Button>
             </Link>
+            <Link href="/admin/moderation">
+              <Button className="w-full bg-orange-600 hover:bg-orange-700">
+                <Shield className="w-4 h-4 mr-2" />
+                Moderation Queue
+              </Button>
+            </Link>
+            <Link href="/admin/reports">
+              <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                <AlertCircle className="w-4 h-4 mr-2" />
+                User Reports
+              </Button>
+            </Link>
             <Link href="/">
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full md:col-span-2 lg:col-span-1">
                 Back to Site
               </Button>
             </Link>

@@ -43,6 +43,10 @@ sentry-sdk[fastapi]==2.19.2
 aiosmtplib==3.0.2
 jinja2==3.1.6
 
+# CSV Processing
+pandas==2.2.3
+python-slugify==8.0.4
+
 # Development
 black==25.11.0
 isort==6.1.0

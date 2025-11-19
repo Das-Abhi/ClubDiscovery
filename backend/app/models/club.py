@@ -50,6 +50,14 @@ class ClubSubcategory(str, enum.Enum):
     OTHER = "other"
 
 
+class ApprovalStatus(str, enum.Enum):
+    """Club approval status for moderation workflow"""
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    NEEDS_REVISION = "needs_revision"
+
+
 class Club(Base):
     """Club model for managing clubs"""
 
@@ -93,6 +101,8 @@ class Club(Base):
     # Status
     is_active = Column(Boolean, default=True, nullable=False)
     is_featured = Column(Boolean, default=False, nullable=False)
+    approval_status = Column(SQLEnum(ApprovalStatus), default=ApprovalStatus.APPROVED, nullable=False, index=True)
+    rejection_reason = Column(Text, nullable=True)  # Reason for rejection or needed revisions
 
     # Relationships
     memberships = relationship("Membership", back_populates="club", cascade="all, delete-orphan")
