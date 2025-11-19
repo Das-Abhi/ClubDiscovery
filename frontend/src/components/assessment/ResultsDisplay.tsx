@@ -115,7 +115,7 @@ export function ResultsDisplay({
                   )}
 
                   {/* Action Button */}
-                  <Link href={`/clubs/cocurricular?club=${rec.club.slug}`}>
+                  <Link href={`/clubs/${rec.club.slug}`}>
                     <Button variant="outline" size="sm" className="w-full sm:w-auto">
                       Learn More
                     </Button>
