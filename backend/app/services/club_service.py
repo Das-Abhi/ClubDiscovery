@@ -56,25 +56,39 @@ class ClubService:
             except ValueError:
                 pass  # Invalid category, skip filter
 
-        # Search
+        # Search using PostgreSQL Full-Text Search (FTS)
+        # This provides O(log n) performance compared to O(n) with ILIKE
         if search:
-            search_pattern = f"%{search}%"
+            # Use PostgreSQL's Full-Text Search with ranking
+            # ts_rank orders results by relevance
+            from sqlalchemy import text
+
+            # Sanitize search query for tsquery (remove special characters)
+            # Convert to tsquery format (words separated by &)
+            search_terms = search.strip().replace("'", "''")  # Escape single quotes
+
+            # Use websearch_to_tsquery for natural language queries
+            # This handles phrases, AND/OR logic, and quoted strings
             query = query.filter(
-                or_(
-                    Club.name.ilike(search_pattern),
-                    Club.tagline.ilike(search_pattern),
-                    Club.description.ilike(search_pattern)
-                )
-            )
+                text("search_vector @@ websearch_to_tsquery('english', :search)")
+            ).params(search=search_terms)
+
+            # Order by relevance (ts_rank) when searching
+            # Higher rank = better match
+            query = query.order_by(
+                text("ts_rank(search_vector, websearch_to_tsquery('english', :search)) DESC")
+            ).params(search=search_terms)
 
         # Get total count
         total = query.count()
 
         # Apply pagination and sorting
-        clubs = query.order_by(Club.is_featured.desc(), Club.created_at.desc())\
-            .offset(skip)\
-            .limit(limit)\
-            .all()
+        # Note: If search is active, results are already ordered by relevance (ts_rank)
+        # Otherwise, order by featured status and creation date
+        if not search:
+            query = query.order_by(Club.is_featured.desc(), Club.created_at.desc())
+
+        clubs = query.offset(skip).limit(limit).all()
 
         return clubs, total
 

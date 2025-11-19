@@ -4,7 +4,7 @@ User database model
 import uuid
 from datetime import datetime
 from sqlalchemy import Boolean, Column, String, DateTime, CheckConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -41,6 +41,10 @@ class User(Base):
     # Email verification tokens
     email_verification_token = Column(String(255), nullable=True)
     email_verification_token_expires = Column(DateTime, nullable=True)
+
+    # User preferences (stored as JSON)
+    # Example: {"theme": "dark", "notifications_enabled": true, "preferred_categories": ["cocurricular"]}
+    preferences = Column(JSONB, nullable=True, default=dict)
 
     # Constraints
     __table_args__ = (

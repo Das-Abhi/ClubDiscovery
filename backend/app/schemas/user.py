@@ -132,3 +132,28 @@ class EmailVerificationRequest(BaseModel):
     """Schema for email verification token"""
 
     token: str
+
+
+class UserPreferences(BaseModel):
+    """Schema for user preferences (stored as JSON)"""
+
+    theme: Optional[str] = Field(None, description="UI theme preference (light/dark)")
+    notifications_enabled: Optional[bool] = Field(True, description="Enable notifications")
+    preferred_categories: Optional[list[str]] = Field(None, description="Preferred club categories")
+    language: Optional[str] = Field("en", description="Preferred language")
+    email_notifications: Optional[bool] = Field(True, description="Enable email notifications")
+    newsletter_subscribed: Optional[bool] = Field(False, description="Subscribe to newsletter")
+
+    class Config:
+        from_attributes = True
+
+
+class UserStatistics(BaseModel):
+    """Schema for user statistics"""
+
+    total_clubs_joined: int = 0
+    total_assessments_taken: int = 0
+    latest_assessment_date: Optional[str] = None
+
+    class Config:
+        from_attributes = True

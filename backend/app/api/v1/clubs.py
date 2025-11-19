@@ -127,12 +127,12 @@ async def get_club(slug: str, db: Session = Depends(get_db)):
 async def create_club(
     club_data: ClubCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_admin)
 ):
     """
-    Create a new club
+    Create a new club (Admin only)
 
-    Requires authentication.
+    Requires admin authentication.
 
     - **name**: Club name (unique)
     - **slug**: Club slug (unique, lowercase with hyphens)
@@ -144,7 +144,6 @@ async def create_club(
 
     Returns created club
     """
-    # TODO: Add admin check in production
     club = club_service.create_club(db, club_data)
     return ClubResponse.model_validate(club)
 
@@ -154,18 +153,17 @@ async def update_club(
     club_id: str,
     club_data: ClubUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_admin)
 ):
     """
-    Update a club
+    Update a club (Admin only)
 
-    Requires authentication.
+    Requires admin authentication.
 
     - **club_id**: UUID of the club to update
 
     Returns updated club
     """
-    # TODO: Add admin check in production
     club = club_service.update_club(db, club_id, club_data)
 
     if not club:
@@ -181,18 +179,17 @@ async def update_club(
 async def delete_club(
     club_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_admin)
 ):
     """
-    Delete a club
+    Delete a club (Admin only)
 
-    Requires authentication.
+    Requires admin authentication.
 
     - **club_id**: UUID of the club to delete
 
     Returns 204 No Content on success
     """
-    # TODO: Add admin check in production
     success = club_service.delete_club(db, club_id)
 
     if not success:
