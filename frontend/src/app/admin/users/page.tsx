@@ -16,32 +16,28 @@ import { adminApi, type AdminUser } from '@/lib/api/admin'
 
 function AdminUsersContent() {
   const router = useRouter()
-  const { user, loadUser } = useAuth()
+  const { user, isLoading: authLoading } = useAuth()
   const { toast } = useToast()
   const [users, setUsers] = useState<AdminUser[]>([])
   const [filteredUsers, setFilteredUsers] = useState<AdminUser[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
   useEffect(() => {
-    // Reload user data to get fresh is_admin status
-    loadUser()
-  }, [])
+    // Wait for auth to finish loading
+    if (authLoading) return
 
-  useEffect(() => {
     // Check if user is admin
-    if (user && !user.is_admin) {
+    if (!user || !user.is_admin) {
       router.push('/')
       return
     }
 
-    if (user) {
-      loadUsers()
-    }
-  }, [user, router])
+    loadUsers()
+  }, [user, authLoading, router])
 
   useEffect(() => {
     // Filter users based on search and filters
@@ -72,7 +68,7 @@ function AdminUsersContent() {
   }, [users, searchQuery, roleFilter, statusFilter])
 
   const loadUsers = async () => {
-    setIsLoading(true)
+    setIsLoadingUsers(true)
     setError(null)
     try {
       const data = await adminApi.getUsers()
@@ -81,7 +77,7 @@ function AdminUsersContent() {
     } catch (err: any) {
       setError(err.message || 'Failed to load users')
     } finally {
-      setIsLoading(false)
+      setIsLoadingUsers(false)
     }
   }
 
@@ -129,7 +125,7 @@ function AdminUsersContent() {
     })
   }
 
-  if (isLoading) {
+  if (authLoading || isLoadingUsers) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
