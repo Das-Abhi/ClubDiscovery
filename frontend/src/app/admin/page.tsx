@@ -15,11 +15,16 @@ import Link from 'next/link'
 
 function AdminDashboardContent() {
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, loadUser } = useAuth()
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [activity, setActivity] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Reload user data to get fresh is_admin status
+    loadUser()
+  }, [])
 
   useEffect(() => {
     // Check if user is admin
@@ -28,7 +33,9 @@ function AdminDashboardContent() {
       return
     }
 
-    loadStats()
+    if (user) {
+      loadStats()
+    }
   }, [user, router])
 
   const loadStats = async () => {

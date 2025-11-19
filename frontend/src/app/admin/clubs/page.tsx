@@ -18,7 +18,7 @@ import { CSVImportModal } from '@/components/admin/CSVImportModal'
 
 function AdminClubsContent() {
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, loadUser } = useAuth()
   const { toast } = useToast()
   const [clubs, setClubs] = useState<AdminClub[]>([])
   const [filteredClubs, setFilteredClubs] = useState<AdminClub[]>([])
@@ -33,13 +33,20 @@ function AdminClubsContent() {
   const [isCSVImportOpen, setIsCSVImportOpen] = useState(false)
 
   useEffect(() => {
+    // Reload user data to get fresh is_admin status
+    loadUser()
+  }, [])
+
+  useEffect(() => {
     // Check if user is admin
     if (user && !user.is_admin) {
       router.push('/')
       return
     }
 
-    loadClubs()
+    if (user) {
+      loadClubs()
+    }
   }, [user, router])
 
   useEffect(() => {
