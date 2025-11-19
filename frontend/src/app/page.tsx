@@ -82,7 +82,7 @@ export default function HomePage() {
                 Take Assessment
               </Button>
             </Link>
-            <Link href="/clubs/cocurricular">
+            <Link href="/search">
               <Button
                 size="lg"
                 variant="glass"
