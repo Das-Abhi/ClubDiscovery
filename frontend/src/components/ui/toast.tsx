@@ -20,24 +20,24 @@ export interface ToastProps {
 
 const variantStyles = {
   success: {
-    bg: 'bg-green-500/10 border-green-500/50',
+    bg: 'bg-green-500/80 border-green-500/50',
     icon: CheckCircle,
-    iconColor: 'text-green-500',
+    iconColor: 'text-white',
   },
   error: {
-    bg: 'bg-red-500/10 border-red-500/50',
+    bg: 'bg-red-500/80 border-red-500/50',
     icon: XCircle,
-    iconColor: 'text-red-500',
+    iconColor: 'text-white',
   },
   warning: {
-    bg: 'bg-yellow-500/10 border-yellow-500/50',
+    bg: 'bg-yellow-500/80 border-yellow-500/50',
     icon: AlertCircle,
-    iconColor: 'text-yellow-500',
+    iconColor: 'text-white',
   },
   info: {
-    bg: 'bg-blue-500/10 border-blue-500/50',
+    bg: 'bg-blue-500/80 border-blue-500/50',
     icon: Info,
-    iconColor: 'text-blue-500',
+    iconColor: 'text-white',
   },
 }
 
@@ -54,12 +54,12 @@ export function Toast({
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: -50, scale: 0.9 }}
+      initial={{ opacity: 0, y: 50, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, x: 100, scale: 0.9 }}
       transition={{ duration: 0.3 }}
       className={cn(
-        'glass-card min-w-[320px] max-w-[420px] p-4 shadow-lg',
+        'backdrop-blur-md min-w-[320px] max-w-[420px] p-4 shadow-lg rounded-lg',
         style.bg,
         'border'
       )}
@@ -71,12 +71,12 @@ export function Toast({
           {title && (
             <h4 className="text-sm font-semibold text-white mb-1">{title}</h4>
           )}
-          <p className="text-sm text-gray-300">{message}</p>
+          <p className="text-sm text-white/90">{message}</p>
         </div>
 
         <button
           onClick={() => onClose(id)}
-          className="flex-shrink-0 text-gray-400 hover:text-white transition-colors"
+          className="flex-shrink-0 text-white/60 hover:text-white transition-colors"
           aria-label="Close notification"
         >
           <X className="w-4 h-4" />
@@ -93,7 +93,7 @@ interface ToastContainerProps {
 
 export function ToastContainer({ toasts, onClose }: ToastContainerProps) {
   return (
-    <div className="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
+    <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
       <AnimatePresence mode="popLayout">
         {toasts.map((toast) => (
           <div key={toast.id} className="pointer-events-auto">
