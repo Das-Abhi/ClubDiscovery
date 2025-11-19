@@ -12,17 +12,30 @@ export default function HomePage() {
   const [featuredClubs, setFeaturedClubs] = useState<Club[]>([])
   const [popularClubs, setPopularClubs] = useState<Club[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [categoryCounts, setCategoryCounts] = useState({
+    cocurricular: 0,
+    extracurricular: 0,
+    department: 0,
+  })
 
   useEffect(() => {
     const fetchClubs = async () => {
       try {
         setIsLoading(true)
-        const [featured, popular] = await Promise.all([
+        const [featured, popular, cocurricularData, extracurricularData, departmentData] = await Promise.all([
           clubsApi.getFeaturedClubs(4),
           clubsApi.getPopularClubs(5),
+          clubsApi.getClubs({ category: 'cocurricular', per_page: 1 }),
+          clubsApi.getClubs({ category: 'extracurricular', per_page: 1 }),
+          clubsApi.getClubs({ category: 'department', per_page: 1 }),
         ])
         setFeaturedClubs(featured)
         setPopularClubs(popular)
+        setCategoryCounts({
+          cocurricular: cocurricularData.total,
+          extracurricular: extracurricularData.total,
+          department: departmentData.total,
+        })
       } catch (error) {
         console.error('Failed to load clubs:', error)
       } finally {
@@ -144,7 +157,7 @@ export default function HomePage() {
               Technical clubs and chapters for tech enthusiasts
             </p>
             <p className="text-red-500 text-sm mt-4 font-medium">
-              40+ clubs →
+              {categoryCounts.cocurricular}+ clubs →
             </p>
           </Link>
 
@@ -160,7 +173,7 @@ export default function HomePage() {
               Social and cultural clubs for creative minds
             </p>
             <p className="text-red-500 text-sm mt-4 font-medium">
-              15+ clubs →
+              {categoryCounts.extracurricular}+ clubs →
             </p>
           </Link>
 
@@ -176,7 +189,7 @@ export default function HomePage() {
               Department-specific clubs and associations
             </p>
             <p className="text-red-500 text-sm mt-4 font-medium">
-              10+ clubs →
+              {categoryCounts.department}+ clubs →
             </p>
           </Link>
         </div>
