@@ -24,8 +24,8 @@ make up            # Start all services
 make down          # Stop all services
 make logs          # View logs from all services
 make clean         # Remove all containers, volumes, and images
-make migrate       # Run database migrations
-make seed          # Seed database with sample data
+make db-migrate    # Run database migrations (Alembic)
+make shell-db      # Access database shell
 ```
 
 ## Services
@@ -67,11 +67,20 @@ cp .env.example .env.local
 ## Database Setup
 
 ```bash
-# Run migrations
-make migrate
+# Run migrations (Alembic)
+make db-migrate
+
+# Or manually from backend directory:
+cd backend
+python manage_migrations.py upgrade
+
+# Initialize database (first time setup)
+cd backend
+python init_db.py
 
 # Seed with sample data
-make seed
+cd backend
+python seed_clubs.py
 ```
 
 ## Troubleshooting
@@ -103,12 +112,16 @@ docker-compose up -d frontend
 
 1. Start services: `make up`
 2. Make changes to code (auto-reload enabled)
-3. Run migrations if schema changes: `make migrate`
+3. Run migrations if schema changes: `make db-migrate`
 4. View logs: `make logs`
 5. Stop services: `make down`
 
 ## Production Build
 
-For production deployment, use separate Dockerfiles:
-- `frontend/Dockerfile` (production)
-- `backend/Dockerfile` (production)
+For production deployment:
+- **Frontend**: Deployed to Vercel (see [DEPLOYMENT.md](./DEPLOYMENT.md))
+- **Backend**: Uses `backend/Dockerfile` or AWS Lambda (see [DEPLOYMENT.md](./DEPLOYMENT.md))
+
+Development uses:
+- `frontend/Dockerfile.dev` (development with hot reload)
+- `backend/Dockerfile` (supports both dev and production)
