@@ -68,4 +68,55 @@ export const authApi = {
     localStorage.removeItem('refresh_token')
     localStorage.removeItem('user')
   },
+
+  /**
+   * Request password reset email
+   */
+  requestPasswordReset: async (email: string): Promise<{ message: string }> => {
+    try {
+      const response = await apiClient.post('/auth/password-reset/request', { email })
+      return response.data
+    } catch (error) {
+      return handleApiError(error)
+    }
+  },
+
+  /**
+   * Confirm password reset with token
+   */
+  confirmPasswordReset: async (token: string, newPassword: string): Promise<{ message: string }> => {
+    try {
+      const response = await apiClient.post('/auth/password-reset/confirm', {
+        token,
+        new_password: newPassword,
+      })
+      return response.data
+    } catch (error) {
+      return handleApiError(error)
+    }
+  },
+
+  /**
+   * Send email verification email
+   */
+  sendVerificationEmail: async (): Promise<{ message: string }> => {
+    try {
+      const response = await apiClient.post('/auth/email/send-verification')
+      return response.data
+    } catch (error) {
+      return handleApiError(error)
+    }
+  },
+
+  /**
+   * Verify email with token
+   */
+  verifyEmail: async (token: string): Promise<{ message: string }> => {
+    try {
+      const response = await apiClient.post('/auth/email/verify', { token })
+      return response.data
+    } catch (error) {
+      return handleApiError(error)
+    }
+  },
 }
