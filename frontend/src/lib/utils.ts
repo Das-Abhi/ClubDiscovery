@@ -79,3 +79,29 @@ export function truncate(str: string, length: number): string {
   if (str.length <= length) return str
   return str.slice(0, length) + '...'
 }
+
+/**
+ * Highlight matching text in a string (case-insensitive)
+ * Returns an array of objects with text and highlighted flag
+ */
+export function highlightText(
+  text: string,
+  query: string
+): Array<{ text: string; highlighted: boolean }> {
+  if (!query || query.trim() === '') {
+    return [{ text, highlighted: false }]
+  }
+
+  const parts: Array<{ text: string; highlighted: boolean }> = []
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+  const matches = text.split(regex)
+
+  matches.forEach((part) => {
+    if (part) {
+      const isHighlighted = part.toLowerCase() === query.toLowerCase()
+      parts.push({ text: part, highlighted: isHighlighted })
+    }
+  })
+
+  return parts
+}

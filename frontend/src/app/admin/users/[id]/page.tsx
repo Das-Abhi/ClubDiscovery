@@ -201,6 +201,7 @@ function UserDetailContent() {
           <Card className="glass-card p-6">
             <h2 className="text-xl font-bold text-white mb-4">Basic Information</h2>
             <div className="space-y-3">
+              {/* Commented out until backend adds these fields
               <div>
                 <p className="text-sm text-gray-400">University ID</p>
                 <p className="text-white font-medium">{user.university_id}</p>
@@ -209,6 +210,7 @@ function UserDetailContent() {
                 <p className="text-sm text-gray-400">Branch</p>
                 <p className="text-white font-medium">{user.branch}</p>
               </div>
+              */}
               <div>
                 <p className="text-sm text-gray-400">Email Status</p>
                 <p className="text-white font-medium flex items-center gap-2">

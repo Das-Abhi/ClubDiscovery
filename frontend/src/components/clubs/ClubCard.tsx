@@ -6,15 +6,17 @@ import { motion } from 'framer-motion'
 import { Club } from '@/lib/types/club'
 import { getInitials } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
+import { Highlight } from '@/components/ui/highlight'
 import { Users } from 'lucide-react'
 
 interface ClubCardProps {
   club: Club
   onClick?: () => void
   index?: number
+  searchQuery?: string
 }
 
-export function ClubCard({ club, onClick, index = 0 }: ClubCardProps) {
+export function ClubCard({ club, onClick, index = 0, searchQuery }: ClubCardProps) {
   const [imageError, setImageError] = useState(false)
 
   return (
@@ -62,11 +64,19 @@ export function ClubCard({ club, onClick, index = 0 }: ClubCardProps) {
           <div className="p-5 space-y-3">
             <div>
               <h3 className="font-semibold text-lg text-white group-hover:text-red-400 transition-colors line-clamp-1">
-                {club.name}
+                {searchQuery ? (
+                  <Highlight text={club.name} query={searchQuery} />
+                ) : (
+                  club.name
+                )}
               </h3>
               {club.tagline && (
                 <p className="text-sm text-gray-400 mt-1 line-clamp-2">
-                  {club.tagline}
+                  {searchQuery ? (
+                    <Highlight text={club.tagline} query={searchQuery} />
+                  ) : (
+                    club.tagline
+                  )}
                 </p>
               )}
             </div>

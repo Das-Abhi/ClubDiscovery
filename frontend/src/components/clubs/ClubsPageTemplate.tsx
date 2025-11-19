@@ -26,12 +26,18 @@ export function ClubsPageTemplate({
 }: ClubsPageTemplateProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<'name' | 'members' | 'recent'>('name')
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | undefined>(undefined)
   const [selectedClub, setSelectedClub] = useState<Club | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  // Filter clubs by category and search query
+  // Filter clubs by category, subcategory, and search query
   const filteredClubs = useMemo(() => {
     let filtered = clubs.filter((club) => club.category === category)
+
+    // Apply subcategory filter
+    if (selectedSubcategory) {
+      filtered = filtered.filter((club) => club.subcategory === selectedSubcategory)
+    }
 
     // Apply search filter
     if (searchQuery.trim()) {
@@ -59,7 +65,7 @@ export function ClubsPageTemplate({
     })
 
     return filtered
-  }, [clubs, category, searchQuery, sortBy])
+  }, [clubs, category, selectedSubcategory, searchQuery, sortBy])
 
   const handleClubClick = (club: Club) => {
     setSelectedClub(club)
@@ -99,11 +105,18 @@ export function ClubsPageTemplate({
             sortBy={sortBy}
             onSortChange={setSortBy}
             totalCount={filteredClubs.length}
+            category={category}
+            selectedSubcategory={selectedSubcategory}
+            onSubcategoryChange={setSelectedSubcategory}
           />
         </div>
 
         {/* Clubs Grid */}
-        <ClubGrid clubs={filteredClubs} onClubClick={handleClubClick} />
+        <ClubGrid
+          clubs={filteredClubs}
+          onClubClick={handleClubClick}
+          searchQuery={searchQuery}
+        />
 
         {/* Club Modal */}
         {selectedClub && (

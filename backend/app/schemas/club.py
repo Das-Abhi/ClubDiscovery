@@ -13,6 +13,7 @@ class ClubBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     slug: str = Field(..., min_length=1, max_length=255)
     category: str = Field(..., pattern="^(cocurricular|extracurricular|department)$")
+    subcategory: Optional[str] = Field(None, max_length=100)
     tagline: Optional[str] = Field(None, max_length=500)
     description: Optional[str] = None
     overview: Optional[str] = None
@@ -45,6 +46,7 @@ class ClubUpdate(BaseModel):
     """Schema for updating a club"""
 
     name: Optional[str] = Field(None, min_length=1, max_length=255)
+    subcategory: Optional[str] = Field(None, max_length=100)
     tagline: Optional[str] = Field(None, max_length=500)
     description: Optional[str] = None
     overview: Optional[str] = None
