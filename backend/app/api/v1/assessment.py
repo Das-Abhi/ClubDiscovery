@@ -13,6 +13,7 @@ from app.schemas.assessment import (
     ClubRecommendation,
 )
 from app.services.assessment_service import assessment_service
+from app.services.club_service import club_service
 from app.api.deps import get_current_user, get_optional_user
 from app.models.user import User
 
@@ -83,27 +84,31 @@ async def get_assessment(
             detail="Assessment not found"
         )
 
-    # Reconstruct recommendations from stored data
+    # Reconstruct recommendations from stored data by fetching club details from database
     recommendations = []
 
-    # Sample clubs data (hardcoded for now)
-    sample_clubs = {
-        "acm": {"id": "1", "name": "ACM Student Chapter", "slug": "acm", "tagline": "ACM student chapter — computing & AI", "logo_url": "/images/clubs/acm.jpg"},
-        "ieee": {"id": "2", "name": "IEEE Student Branch", "slug": "ieee", "tagline": "Advancing technology for humanity", "logo_url": "/images/clubs/ieee.jpg"},
-        "robotics": {"id": "3", "name": "Robotics Club", "slug": "robotics", "tagline": "Build the future", "logo_url": "/images/clubs/robotics.jpg"},
-        "dance": {"id": "4", "name": "Dance Club", "slug": "dance", "tagline": "Express through movement", "logo_url": "/images/clubs/dance.jpg"},
-        "music": {"id": "5", "name": "Music Club", "slug": "music", "tagline": "Create harmony", "logo_url": "/images/clubs/music.jpg"},
-        "edc": {"id": "6", "name": "EDC", "slug": "edc", "tagline": "Entrepreneurship Development Cell", "logo_url": "/images/clubs/edc.jpg"},
-    }
-
     for rec in sorted(assessment.recommendations, key=lambda x: x.rank):
-        club_data = sample_clubs.get(rec.club_id, {
-            "id": rec.club_id,
-            "name": rec.club_id.upper(),
-            "slug": rec.club_id,
-            "tagline": "",
-            "logo_url": ""
-        })
+        # Fetch club from database using slug
+        club = club_service.get_club_by_slug(db, rec.club_id)
+
+        if club:
+            # Use actual club data from database
+            club_data = {
+                "id": str(club.id),
+                "name": club.name,
+                "slug": club.slug,
+                "tagline": club.tagline or "",
+                "logo_url": club.logo_url or ""
+            }
+        else:
+            # Fallback for clubs that might have been deleted
+            club_data = {
+                "id": rec.club_id,
+                "name": rec.club_id.replace("-", " ").title(),
+                "slug": rec.club_id,
+                "tagline": "Club information unavailable",
+                "logo_url": ""
+            }
 
         recommendations.append(ClubRecommendation(
             club=club_data,
