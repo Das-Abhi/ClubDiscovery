@@ -11,11 +11,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { AuthGuard } from '@/components/auth/AuthGuard'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useToast } from '@/lib/hooks/useToast'
 import { adminApi, type AdminUser } from '@/lib/api/admin'
 
 function AdminUsersContent() {
   const router = useRouter()
   const { user } = useAuth()
+  const { toast } = useToast()
   const [users, setUsers] = useState<AdminUser[]>([])
   const [filteredUsers, setFilteredUsers] = useState<AdminUser[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -88,8 +90,9 @@ function AdminUsersContent() {
       setUsers(
         users.map((u) => (u.id === userId ? { ...u, is_admin: !currentStatus } : u))
       )
+      toast.success(`User role updated successfully`, 'Success')
     } catch (err: any) {
-      alert(err.message || 'Failed to update user role')
+      toast.error(err.message || 'Failed to update user role', 'Error')
     }
   }
 
@@ -105,8 +108,9 @@ function AdminUsersContent() {
       setUsers(
         users.map((u) => (u.id === userId ? { ...u, is_active: !currentStatus } : u))
       )
+      toast.success(`User ${!currentStatus ? 'activated' : 'deactivated'} successfully`, 'Success')
     } catch (err: any) {
-      alert(err.message || 'Failed to update user status')
+      toast.error(err.message || 'Failed to update user status', 'Error')
     }
   }
 

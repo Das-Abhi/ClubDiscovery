@@ -10,6 +10,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/auth/AuthGuard'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useToast } from '@/lib/hooks/useToast'
 import { adminApi, type AdminUser } from '@/lib/api/admin'
 import { assessmentApi } from '@/lib/api/assessment'
 import { clubsApi, type Membership } from '@/lib/api/clubs'
@@ -19,6 +20,7 @@ function UserDetailContent() {
   const router = useRouter()
   const params = useParams()
   const { user: currentUser } = useAuth()
+  const { toast } = useToast()
   const userId = params.id as string
 
   const [user, setUser] = useState<AdminUser | null>(null)
@@ -82,8 +84,9 @@ function UserDetailContent() {
     try {
       await adminApi.updateUserRole(user.id, !user.is_admin)
       setUser({ ...user, is_admin: !user.is_admin })
+      toast.success('User role updated successfully', 'Success')
     } catch (err: any) {
-      alert(err.message || 'Failed to update user role')
+      toast.error(err.message || 'Failed to update user role', 'Error')
     }
   }
 
@@ -98,8 +101,9 @@ function UserDetailContent() {
     try {
       await adminApi.updateUserStatus(user.id, !user.is_active)
       setUser({ ...user, is_active: !user.is_active })
+      toast.success(`User ${!user.is_active ? 'activated' : 'deactivated'} successfully`, 'Success')
     } catch (err: any) {
-      alert(err.message || 'Failed to update user status')
+      toast.error(err.message || 'Failed to update user status', 'Error')
     }
   }
 

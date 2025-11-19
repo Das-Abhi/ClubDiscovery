@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
+import { ToastProvider } from '@/components/providers/toast-provider'
+import { ErrorBoundary } from '@/components/ui/error-boundary'
 
 export const metadata: Metadata = {
   title: 'ClubCompass - Discover Your Perfect Club at BMSCE',
@@ -23,13 +25,16 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body>
-        <div className="min-h-screen relative flex flex-col">
-          <Header />
-          <main className="flex-1 pt-16">
-            {children}
-          </main>
-          <Footer />
-        </div>
+        <ErrorBoundary>
+          <div className="min-h-screen relative flex flex-col">
+            <Header />
+            <main className="flex-1 pt-16">
+              {children}
+            </main>
+            <Footer />
+          </div>
+          <ToastProvider />
+        </ErrorBoundary>
       </body>
     </html>
   )
