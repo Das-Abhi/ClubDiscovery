@@ -9,7 +9,7 @@ from app.models import User, Assessment, Recommendation, Club, Membership, Annou
 def init_db():
     """Create all database tables"""
     print("Creating database tables...")
-    print("- Users table")
+    print("- Users table (with auth tokens)")
     print("- Assessments table")
     print("- Recommendations table")
     print("- Clubs table")
@@ -21,13 +21,18 @@ def init_db():
 
     print("\n✅ Database tables created successfully!")
     print("\nTables created:")
-    print("  • users")
+    print("  • users (includes password reset & email verification tokens)")
     print("  • assessments")
     print("  • recommendations")
     print("  • clubs")
     print("  • memberships")
     print("  • announcements")
     print("  • gallery_settings")
+    print("\n📝 New user fields added in Phase 3:")
+    print("  - reset_password_token")
+    print("  - reset_password_token_expires")
+    print("  - email_verification_token")
+    print("  - email_verification_token_expires")
 
 
 if __name__ == "__main__":
