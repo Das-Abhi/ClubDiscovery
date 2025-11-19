@@ -16,22 +16,6 @@ export function initSentry() {
       replaysSessionSampleRate: 0.1, // Sample 10% of sessions
       replaysOnErrorSampleRate: 1.0, // Sample 100% of sessions with errors
 
-      // Integrations
-      integrations: [
-        new Sentry.BrowserTracing({
-          // Set sampling rate for performance monitoring
-          tracePropagationTargets: [
-            'localhost',
-            'clubcompass.bmsce.ac.in',
-            /^https:\/\/api\.clubcompass\.bmsce\.ac\.in/,
-          ],
-        }),
-        new Sentry.Replay({
-          maskAllText: true,
-          blockAllMedia: true,
-        }),
-      ],
-
       // Filter out errors
       beforeSend(event, hint) {
         // Don't send errors in development
