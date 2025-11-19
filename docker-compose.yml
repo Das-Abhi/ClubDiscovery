@@ -57,7 +57,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: bash -c "chmod +x /app/start.sh && /app/start.sh"
+    command: bash /app/start.sh
 
   # Next.js Frontend
   frontend:
