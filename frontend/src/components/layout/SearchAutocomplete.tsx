@@ -94,7 +94,7 @@ export function SearchAutocomplete({ className, onSelect }: SearchAutocompletePr
 
   const handleSelectClub = (club: Club) => {
     saveRecentSearch(club.name)
-    router.push(`/clubs/${club.category}`)
+    router.push(`/clubs/${club.slug}`)
     setSearchQuery('')
     setIsOpen(false)
     onSelect?.()
