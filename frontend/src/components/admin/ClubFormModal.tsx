@@ -68,10 +68,27 @@ export function ClubFormModal({
   // Load initial data when modal opens
   useEffect(() => {
     if (isOpen && initialData) {
-      setFormData((prev) => ({
-        ...prev,
+      // Reset to clean defaults first, then apply initialData
+      // This prevents stale values from previous edits
+      setFormData({
+        name: '',
+        slug: '',
+        category: 'cocurricular',
+        tagline: '',
+        description: '',
+        overview: '',
+        logo_url: '',
+        cover_image_url: '',
+        instagram: '',
+        linkedin: '',
+        twitter: '',
+        website: '',
+        faculty_name: '',
+        faculty_email: '',
+        faculty_phone: '',
+        is_featured: false,
         ...initialData,
-      }))
+      })
     } else if (isOpen && !initialData) {
       // Reset form for create mode
       setFormData({
