@@ -16,16 +16,22 @@ interface AuthGuardProps {
 export function AuthGuard({ children, requireAuth = true }: AuthGuardProps) {
   const router = useRouter()
   const pathname = usePathname()
-  const { isAuthenticated, isLoading, loadUser } = useAuth()
+  const { isAuthenticated, isLoading, _hasHydrated, loadUser } = useAuth()
 
   useEffect(() => {
+    // Wait for hydration to complete before loading user
+    if (!_hasHydrated) return
+
     // Load user on mount if not already loaded
     if (!isAuthenticated && !isLoading) {
       loadUser()
     }
-  }, [isAuthenticated, isLoading, loadUser])
+  }, [isAuthenticated, isLoading, _hasHydrated, loadUser])
 
   useEffect(() => {
+    // Wait for hydration to complete before making auth decisions
+    if (!_hasHydrated) return
+
     // If auth is required and user is not authenticated, redirect to login
     if (requireAuth && !isLoading && !isAuthenticated) {
       // Save the current path to redirect back after login
@@ -37,10 +43,10 @@ export function AuthGuard({ children, requireAuth = true }: AuthGuardProps) {
     if (!requireAuth && !isLoading && isAuthenticated && pathname === '/auth') {
       router.push('/')
     }
-  }, [requireAuth, isAuthenticated, isLoading, pathname, router])
+  }, [requireAuth, isAuthenticated, isLoading, _hasHydrated, pathname, router])
 
-  // Show loading state
-  if (isLoading) {
+  // Show loading state while hydrating or loading user
+  if (!_hasHydrated || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner variant="compass" size="xl" text="Loading..." />
