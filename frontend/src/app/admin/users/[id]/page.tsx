@@ -54,22 +54,22 @@ function UserDetailContent() {
       setUser(userData)
 
       // Load user assessments
+      // Note: Backend restricts assessment access to own assessments only (no admin bypass)
+      // Gracefully handle 403 errors and show empty state
       try {
         const assessmentData = await assessmentApi.getUserAssessments(userId)
         setAssessments(assessmentData)
-      } catch (err) {
-        console.error('Failed to load assessments:', err)
+      } catch (err: any) {
+        // Silently fail for assessments - backend doesn't support admin access to user assessments
+        console.debug('User assessments not accessible:', err.message)
+        setAssessments([])
       }
 
       // Load user memberships
-      try {
-        // Note: This assumes the API supports fetching memberships for any user
-        // You might need to adjust based on your actual API
-        const membershipData = await clubsApi.getUserMemberships()
-        setMemberships(membershipData)
-      } catch (err) {
-        console.error('Failed to load memberships:', err)
-      }
+      // Note: Backend doesn't have an admin endpoint to fetch any user's memberships
+      // The /users/me/memberships endpoint only returns current user's data
+      // Leave empty until backend adds admin endpoint
+      setMemberships([])
     } catch (err: any) {
       setError(err.message || 'Failed to load user details')
     } finally {
