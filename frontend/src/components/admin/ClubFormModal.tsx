@@ -68,26 +68,25 @@ export function ClubFormModal({
   // Load initial data when modal opens
   useEffect(() => {
     if (isOpen && initialData) {
-      // Reset to clean defaults first, then apply initialData
-      // This prevents stale values from previous edits
+      // Explicitly map all fields to prevent null/undefined from backend
+      // causing React controlled input issues
       setFormData({
-        name: '',
-        slug: '',
-        category: 'cocurricular',
-        tagline: '',
-        description: '',
-        overview: '',
-        logo_url: '',
-        cover_image_url: '',
-        instagram: '',
-        linkedin: '',
-        twitter: '',
-        website: '',
-        faculty_name: '',
-        faculty_email: '',
-        faculty_phone: '',
-        is_featured: false,
-        ...initialData,
+        name: initialData.name || '',
+        slug: initialData.slug || '',
+        category: initialData.category || 'cocurricular',
+        tagline: initialData.tagline || '',
+        description: initialData.description || '',
+        overview: initialData.overview || '',
+        logo_url: initialData.logo_url || '',
+        cover_image_url: initialData.cover_image_url || '',
+        instagram: initialData.instagram || '',
+        linkedin: initialData.linkedin || '',
+        twitter: initialData.twitter || '',
+        website: initialData.website || '',
+        faculty_name: initialData.faculty_name || '',
+        faculty_email: initialData.faculty_email || '',
+        faculty_phone: initialData.faculty_phone || '',
+        is_featured: initialData.is_featured || false,
       })
     } else if (isOpen && !initialData) {
       // Reset form for create mode
