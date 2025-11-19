@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL Database
   db:
@@ -51,7 +49,7 @@ services:
       - REDIS_URL=redis://redis:6379
       - SECRET_KEY=dev-secret-key-change-in-production
       - ALGORITHM=HS256
-      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8000
+      - ALLOWED_ORIGINS=["http://localhost:3000","http://localhost:8000"]
       - ENVIRONMENT=development
     depends_on:
       db:

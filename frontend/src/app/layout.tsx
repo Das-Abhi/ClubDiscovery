@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
@@ -13,12 +13,6 @@ export const metadata: Metadata = {
   keywords: ['BMSCE', 'clubs', 'college', 'extracurricular', 'BMS College of Engineering'],
   authors: [{ name: 'ClubCompass Team' }],
   manifest: '/manifest.json',
-  themeColor: '#8B0000',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-  },
   openGraph: {
     title: 'ClubCompass - BMSCE Club Discovery',
     description: 'Discover and join clubs at BMS College of Engineering',
@@ -29,6 +23,13 @@ export const metadata: Metadata = {
     statusBarStyle: 'black-translucent',
     title: 'ClubCompass',
   },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: '#8B0000',
 }
 
 export default function RootLayout({
