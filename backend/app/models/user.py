@@ -34,6 +34,14 @@ class User(Base):
     is_active = Column(Boolean, default=True, nullable=False)
     is_admin = Column(Boolean, default=False, nullable=False)
 
+    # Password reset tokens
+    reset_password_token = Column(String(255), nullable=True)
+    reset_password_token_expires = Column(DateTime, nullable=True)
+
+    # Email verification tokens
+    email_verification_token = Column(String(255), nullable=True)
+    email_verification_token_expires = Column(DateTime, nullable=True)
+
     # Constraints
     __table_args__ = (
         CheckConstraint(

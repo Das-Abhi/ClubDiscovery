@@ -91,3 +91,44 @@ class TokenRefresh(BaseModel):
     """Schema for token refresh request"""
 
     refresh_token: str
+
+
+class PasswordResetRequest(BaseModel):
+    """Schema for password reset request"""
+
+    email: EmailStr
+
+    @field_validator("email")
+    @classmethod
+    def validate_bmsce_email(cls, v: str) -> str:
+        """Validate that email is from BMSCE domain"""
+        if not v.lower().endswith("@bmsce.ac.in"):
+            raise ValueError("Email must be a valid BMSCE email address (@bmsce.ac.in)")
+        return v.lower()
+
+
+class PasswordResetConfirm(BaseModel):
+    """Schema for confirming password reset"""
+
+    token: str
+    new_password: str = Field(..., min_length=8, max_length=100)
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        """Validate password strength"""
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters long")
+        if not any(c.isupper() for c in v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not any(c.islower() for c in v):
+            raise ValueError("Password must contain at least one lowercase letter")
+        if not any(c.isdigit() for c in v):
+            raise ValueError("Password must contain at least one digit")
+        return v
+
+
+class EmailVerificationRequest(BaseModel):
+    """Schema for email verification token"""
+
+    token: str

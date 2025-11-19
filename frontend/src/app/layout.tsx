@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
+import { VerifyEmailBanner } from '@/components/auth/VerifyEmailBanner'
 import { ToastProvider } from '@/components/providers/toast-provider'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
 
@@ -26,6 +27,7 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body>
         <ErrorBoundary>
+          <VerifyEmailBanner />
           <div className="min-h-screen relative flex flex-col">
             <Header />
             <main className="flex-1 pt-16">

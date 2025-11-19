@@ -8,13 +8,15 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { AuthGuard } from '@/components/auth/AuthGuard'
+import { EditProfileModal } from '@/components/profile/EditProfileModal'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { ClipboardList, Calendar } from 'lucide-react'
+import { ClipboardList, Calendar, Edit } from 'lucide-react'
 import { assessmentApi } from '@/lib/api/assessment'
 import { clubsApi, type Membership } from '@/lib/api/clubs'
 import type { Assessment } from '@/lib/types/assessment'
+import type { User } from '@/lib/types/user'
 
 function ProfileContent() {
   const router = useRouter()
@@ -23,6 +25,7 @@ function ProfileContent() {
   const [memberships, setMemberships] = useState<Membership[]>([])
   const [loadingAssessments, setLoadingAssessments] = useState(false)
   const [loadingMemberships, setLoadingMemberships] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -155,16 +158,40 @@ function ProfileContent() {
                 </div>
               </div>
 
-              {/* Logout Button */}
-              <Button
-                onClick={handleLogout}
-                variant="outline"
-                className="ml-4"
-              >
-                Logout
-              </Button>
+              {/* Action Buttons */}
+              <div className="ml-4 flex gap-2">
+                <Button
+                  onClick={() => setIsEditModalOpen(true)}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Edit className="w-4 h-4" />
+                  Edit Profile
+                </Button>
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  size="sm"
+                >
+                  Logout
+                </Button>
+              </div>
             </div>
           </Card>
+
+          {/* Edit Profile Modal */}
+          {user && (
+            <EditProfileModal
+              isOpen={isEditModalOpen}
+              onClose={() => setIsEditModalOpen(false)}
+              user={user}
+              onSuccess={(updatedUser) => {
+                // User will be automatically updated via loadUser in the modal
+                console.log('Profile updated successfully:', updatedUser)
+              }}
+            />
+          )}
 
           {/* Assessment History Section */}
           <Card className="glass-card p-8 mb-8">
