@@ -6,9 +6,10 @@ import { ClubCard } from './ClubCard'
 interface ClubGridProps {
   clubs: Club[]
   onClubClick?: (club: Club) => void
+  searchQuery?: string
 }
 
-export function ClubGrid({ clubs, onClubClick }: ClubGridProps) {
+export function ClubGrid({ clubs, onClubClick, searchQuery }: ClubGridProps) {
   if (clubs.length === 0) {
     return (
       <div className="text-center py-20">
@@ -31,6 +32,7 @@ export function ClubGrid({ clubs, onClubClick }: ClubGridProps) {
           club={club}
           index={index}
           onClick={() => onClubClick?.(club)}
+          searchQuery={searchQuery}
         />
       ))}
     </div>

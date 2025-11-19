@@ -1,9 +1,11 @@
 'use client'
 
-import { Search, SlidersHorizontal } from 'lucide-react'
+import { Search, SlidersHorizontal, Filter, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { ClubCategory } from '@/lib/types/club'
+import { getSubcategoriesForCategory, Subcategory } from '@/lib/constants/subcategories'
 
 interface ClubFiltersProps {
   searchQuery: string
@@ -11,6 +13,9 @@ interface ClubFiltersProps {
   sortBy: 'name' | 'members' | 'recent'
   onSortChange: (sort: 'name' | 'members' | 'recent') => void
   totalCount: number
+  category?: ClubCategory
+  selectedSubcategory?: string
+  onSubcategoryChange?: (subcategory: string | undefined) => void
 }
 
 export function ClubFilters({
@@ -19,12 +24,17 @@ export function ClubFilters({
   sortBy,
   onSortChange,
   totalCount,
+  category,
+  selectedSubcategory,
+  onSubcategoryChange,
 }: ClubFiltersProps) {
   const sortOptions = [
     { value: 'name' as const, label: 'Name' },
     { value: 'members' as const, label: 'Members' },
     { value: 'recent' as const, label: 'Recent' },
   ]
+
+  const subcategories = category ? getSubcategoriesForCategory(category) : []
 
   return (
     <div className="space-y-4">
@@ -65,6 +75,55 @@ export function ClubFilters({
           </div>
         </div>
       </div>
+
+      {/* Subcategory Filters */}
+      {subcategories.length > 0 && onSubcategoryChange && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 text-sm text-gray-400">
+            <Filter className="h-4 w-4" />
+            <span>Filter:</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onSubcategoryChange(undefined)}
+            className={cn(
+              "text-sm",
+              !selectedSubcategory
+                ? "text-red-500 bg-red-500/10"
+                : "text-gray-400 hover:text-white"
+            )}
+          >
+            All
+          </Button>
+          {subcategories.map((subcategory) => (
+            <Button
+              key={subcategory.value}
+              variant="ghost"
+              size="sm"
+              onClick={() => onSubcategoryChange(subcategory.value)}
+              className={cn(
+                "text-sm",
+                selectedSubcategory === subcategory.value
+                  ? "text-red-500 bg-red-500/10"
+                  : "text-gray-400 hover:text-white"
+              )}
+            >
+              {subcategory.label}
+            </Button>
+          ))}
+          {selectedSubcategory && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onSubcategoryChange(undefined)}
+              className="text-gray-400 hover:text-white"
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* Results Count */}
       <div className="flex items-center justify-between text-sm">

@@ -18,6 +18,38 @@ class ClubCategory(str, enum.Enum):
     DEPARTMENT = "department"
 
 
+class ClubSubcategory(str, enum.Enum):
+    """Club subcategory enum"""
+    # Co-curricular subcategories
+    TECHNICAL = "technical"
+    ROBOTICS = "robotics"
+    AI_ML = "ai_ml"
+    RESEARCH = "research"
+    INNOVATION = "innovation"
+    AEROSPACE = "aerospace"
+    CODING = "coding"
+
+    # Extra-curricular subcategories
+    CULTURAL = "cultural"
+    SOCIAL = "social"
+    SPORTS = "sports"
+    ARTS = "arts"
+    MUSIC = "music"
+    DANCE = "dance"
+    DRAMA = "drama"
+    LITERATURE = "literature"
+
+    # Department subcategories (by department)
+    CSE = "cse"
+    ISE = "ise"
+    ECE = "ece"
+    MECHANICAL = "mechanical"
+    CIVIL = "civil"
+    EEE = "eee"
+    AEROSPACE_DEPT = "aerospace_dept"
+    OTHER = "other"
+
+
 class Club(Base):
     """Club model for managing clubs"""
 
@@ -30,6 +62,7 @@ class Club(Base):
     name = Column(String(255), unique=True, nullable=False, index=True)
     slug = Column(String(255), unique=True, nullable=False, index=True)
     category = Column(SQLEnum(ClubCategory), nullable=False, index=True)
+    subcategory = Column(String(100), nullable=True, index=True)  # Using String instead of enum for flexibility
     tagline = Column(String(500), nullable=True)
     description = Column(Text, nullable=True)
     overview = Column(Text, nullable=True)
