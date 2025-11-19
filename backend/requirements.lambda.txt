@@ -1,0 +1,2 @@
+# Additional dependencies for AWS Lambda deployment
+mangum==0.17.0

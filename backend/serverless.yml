@@ -1,0 +1,132 @@
+service: clubcompass-api
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.11
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  memorySize: 512
+  timeout: 30
+
+  environment:
+    ENVIRONMENT: ${self:provider.stage}
+    DATABASE_URL: ${ssm:/clubcompass/${self:provider.stage}/database-url}
+    REDIS_URL: ${ssm:/clubcompass/${self:provider.stage}/redis-url}
+    SECRET_KEY: ${ssm:/clubcompass/${self:provider.stage}/secret-key~true}
+    ALGORITHM: HS256
+    ACCESS_TOKEN_EXPIRE_MINUTES: 60
+    REFRESH_TOKEN_EXPIRE_DAYS: 7
+    ALLOWED_ORIGINS: ${ssm:/clubcompass/${self:provider.stage}/allowed-origins}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - ssm:GetParameter
+            - ssm:GetParameters
+          Resource:
+            - arn:aws:ssm:${self:provider.region}:*:parameter/clubcompass/${self:provider.stage}/*
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: '*'
+
+  apiGateway:
+    shouldStartNameWithService: true
+    minimumCompressionSize: 1024
+
+  vpc:
+    # Configure VPC if your database is in a VPC
+    # securityGroupIds:
+    #   - sg-xxxxxxxxx
+    # subnetIds:
+    #   - subnet-xxxxxxxxx
+    #   - subnet-xxxxxxxxx
+
+functions:
+  api:
+    handler: handler.handler
+    events:
+      - httpApi:
+          path: /{proxy+}
+          method: ANY
+      - httpApi:
+          path: /
+          method: ANY
+    layers:
+      - Ref: PythonRequirementsLambdaLayer
+    environment:
+      PYTHONPATH: /var/task:/opt/python
+
+plugins:
+  - serverless-python-requirements
+  - serverless-offline
+  - serverless-dotenv-plugin
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    layer: true
+    zip: true
+    slim: true
+    strip: false
+    useStaticCache: true
+    useDownloadCache: true
+    cacheLocation: "./.serverless-cache"
+    pipCmdExtraArgs:
+      - --no-cache-dir
+    noDeploy:
+      - pytest
+      - pytest-cov
+      - pytest-asyncio
+      - black
+      - flake8
+      - mypy
+      - isort
+
+  dotenv:
+    path: .env.${self:provider.stage}
+    include:
+      - DATABASE_URL
+      - REDIS_URL
+      - SECRET_KEY
+      - ALLOWED_ORIGINS
+
+package:
+  individually: false
+  patterns:
+    - '!.venv/**'
+    - '!node_modules/**'
+    - '!.pytest_cache/**'
+    - '!__pycache__/**'
+    - '!.coverage'
+    - '!coverage.xml'
+    - '!.git/**'
+    - '!.github/**'
+    - '!tests/**'
+    - '!*.md'
+    - '!.env*'
+    - 'app/**'
+    - 'handler.py'
+
+resources:
+  Resources:
+    # CloudWatch Log Group
+    ApiLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-api
+        RetentionInDays: 14
+
+  Outputs:
+    ApiUrl:
+      Description: API Gateway endpoint URL
+      Value:
+        Fn::Sub: https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com
+      Export:
+        Name: ${self:service}-${self:provider.stage}-api-url
