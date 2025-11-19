@@ -51,12 +51,13 @@ services:
       - ALGORITHM=HS256
       - ALLOWED_ORIGINS=["http://localhost:3000","http://localhost:8000"]
       - ENVIRONMENT=development
+      - POSTGRES_PASSWORD=password
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: bash -c "chmod +x /app/start.sh && /app/start.sh"
 
   # Next.js Frontend
   frontend:
