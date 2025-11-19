@@ -103,7 +103,7 @@ jobs:
           pip install safety bandit
 
       - name: Run Safety (dependency vulnerability check)
-        run: safety check --json || true
+        run: safety check --json
 
       - name: Run Bandit (security issues)
-        run: bandit -r app/ -f json -o bandit-report.json || true
+        run: bandit -r app/ -f json -o bandit-report.json
