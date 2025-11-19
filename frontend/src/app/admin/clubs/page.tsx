@@ -11,12 +11,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { AuthGuard } from '@/components/auth/AuthGuard'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useToast } from '@/lib/hooks/useToast'
 import { adminApi, type AdminClub } from '@/lib/api/admin'
 import { ClubFormModal, type ClubFormData } from '@/components/admin/ClubFormModal'
 
 function AdminClubsContent() {
   const router = useRouter()
   const { user } = useAuth()
+  const { toast } = useToast()
   const [clubs, setClubs] = useState<AdminClub[]>([])
   const [filteredClubs, setFilteredClubs] = useState<AdminClub[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -88,8 +90,9 @@ function AdminClubsContent() {
           club.id === clubId ? { ...club, is_featured: !currentStatus } : club
         )
       )
+      toast.success(`Club ${!currentStatus ? 'marked as featured' : 'unmarked as featured'}`, 'Success')
     } catch (err: any) {
-      alert(err.message || 'Failed to update featured status')
+      toast.error(err.message || 'Failed to update featured status', 'Error')
     }
   }
 
@@ -102,8 +105,9 @@ function AdminClubsContent() {
           club.id === clubId ? { ...club, is_active: !currentStatus } : club
         )
       )
+      toast.success(`Club ${!currentStatus ? 'activated' : 'deactivated'}`, 'Success')
     } catch (err: any) {
-      alert(err.message || 'Failed to update active status')
+      toast.error(err.message || 'Failed to update active status', 'Error')
     }
   }
 
@@ -116,9 +120,9 @@ function AdminClubsContent() {
       await adminApi.deleteClub(clubId)
       // Remove from local state
       setClubs(clubs.filter((club) => club.id !== clubId))
-      alert('Club deleted successfully')
+      toast.success('Club deleted successfully', 'Success')
     } catch (err: any) {
-      alert(err.message || 'Failed to delete club')
+      toast.error(err.message || 'Failed to delete club', 'Error')
     }
   }
 
@@ -144,12 +148,12 @@ function AdminClubsContent() {
       // Create new club
       const newClub = await adminApi.createClub(data)
       setClubs([newClub, ...clubs])
-      alert('Club created successfully')
+      toast.success('Club created successfully', 'Success')
     } else if (modalMode === 'edit' && selectedClub) {
       // Update existing club
       const updatedClub = await adminApi.updateClub(selectedClub.id, data)
       setClubs(clubs.map((club) => (club.id === selectedClub.id ? updatedClub : club)))
-      alert('Club updated successfully')
+      toast.success('Club updated successfully', 'Success')
     }
   }
 

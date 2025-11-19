@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Search, Clock, TrendingUp } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { clubsApi, type Club } from '@/lib/api/clubs'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -138,9 +139,8 @@ export function SearchAutocomplete({ className, onSelect }: SearchAutocompletePr
           className="absolute top-full left-0 right-0 mt-2 glass-card rounded-lg shadow-lg z-50 max-h-[400px] overflow-y-auto"
         >
           {isLoading && (
-            <div className="p-4 text-center text-sm text-gray-400">
-              <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-              Searching...
+            <div className="p-4 text-center">
+              <LoadingSpinner size="sm" text="Searching..." />
             </div>
           )}
 
