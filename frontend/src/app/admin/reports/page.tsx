@@ -15,7 +15,7 @@ import { reportsApi, type DetailedReport, type ReportStats } from '@/lib/api/rep
 
 function AdminReportsContent() {
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, loadUser } = useAuth()
   const { toast } = useToast()
   const [reports, setReports] = useState<DetailedReport[]>([])
   const [filteredReports, setFilteredReports] = useState<DetailedReport[]>([])
@@ -30,12 +30,19 @@ function AdminReportsContent() {
   const [isUpdating, setIsUpdating] = useState(false)
 
   useEffect(() => {
+    // Reload user data to get fresh is_admin status
+    loadUser()
+  }, [])
+
+  useEffect(() => {
     if (user && !user.is_admin) {
       router.push('/')
       return
     }
-    loadReports()
-    loadStats()
+    if (user) {
+      loadReports()
+      loadStats()
+    }
   }, [user, router])
 
   useEffect(() => {

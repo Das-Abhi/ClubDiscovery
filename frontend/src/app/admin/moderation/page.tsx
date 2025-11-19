@@ -15,7 +15,7 @@ import { adminApi, type AdminClub } from '@/lib/api/admin'
 
 function AdminModerationContent() {
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, loadUser } = useAuth()
   const { toast } = useToast()
   const [pendingClubs, setPendingClubs] = useState<AdminClub[]>([])
   const [stats, setStats] = useState<any>(null)
@@ -29,12 +29,19 @@ function AdminModerationContent() {
   const [isProcessing, setIsProcessing] = useState(false)
 
   useEffect(() => {
+    // Reload user data to get fresh is_admin status
+    loadUser()
+  }, [])
+
+  useEffect(() => {
     if (user && !user.is_admin) {
       router.push('/')
       return
     }
-    loadPendingClubs()
-    loadStats()
+    if (user) {
+      loadPendingClubs()
+      loadStats()
+    }
   }, [user, router])
 
   const loadPendingClubs = async () => {

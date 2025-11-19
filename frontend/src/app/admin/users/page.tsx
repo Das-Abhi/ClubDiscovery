@@ -16,7 +16,7 @@ import { adminApi, type AdminUser } from '@/lib/api/admin'
 
 function AdminUsersContent() {
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, loadUser } = useAuth()
   const { toast } = useToast()
   const [users, setUsers] = useState<AdminUser[]>([])
   const [filteredUsers, setFilteredUsers] = useState<AdminUser[]>([])
@@ -27,13 +27,20 @@ function AdminUsersContent() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
   useEffect(() => {
+    // Reload user data to get fresh is_admin status
+    loadUser()
+  }, [])
+
+  useEffect(() => {
     // Check if user is admin
     if (user && !user.is_admin) {
       router.push('/')
       return
     }
 
-    loadUsers()
+    if (user) {
+      loadUsers()
+    }
   }, [user, router])
 
   useEffect(() => {

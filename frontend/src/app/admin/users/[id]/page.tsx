@@ -19,7 +19,7 @@ import type { Assessment } from '@/lib/types/assessment'
 function UserDetailContent() {
   const router = useRouter()
   const params = useParams()
-  const { user: currentUser } = useAuth()
+  const { user: currentUser, loadUser } = useAuth()
   const { toast } = useToast()
   const userId = params.id as string
 
@@ -30,12 +30,17 @@ function UserDetailContent() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    // Reload user data to get fresh is_admin status
+    loadUser()
+  }, [])
+
+  useEffect(() => {
     if (currentUser && !currentUser.is_admin) {
       router.push('/')
       return
     }
 
-    if (userId) {
+    if (currentUser && userId) {
       loadUserDetails()
     }
   }, [currentUser, userId, router])
