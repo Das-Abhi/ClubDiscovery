@@ -7,9 +7,8 @@ from sqlalchemy import desc
 from typing import List, Optional
 from datetime import datetime
 
-from app.api.deps import get_db
+from app.api.deps import get_db, get_current_user
 from app.middleware.admin import require_admin
-from app.core.security import get_current_user
 from app.models.user import User
 from app.models.club import Club
 from app.models.report import UserReport, ReportStatus, ReportType
