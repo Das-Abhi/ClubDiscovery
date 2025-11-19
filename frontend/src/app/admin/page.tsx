@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Users, Building2, TrendingUp, ClipboardList, Star, Activity } from 'lucide-react'
+import { Users, Building2, TrendingUp, ClipboardList, Star, Activity, AlertCircle, Shield } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/auth/AuthGuard'
@@ -248,7 +248,7 @@ function AdminDashboardContent() {
         {/* Quick Actions */}
         <Card className="glass-card p-6">
           <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <Link href="/admin/users">
               <Button className="w-full bg-blue-600 hover:bg-blue-700">
                 <Users className="w-4 h-4 mr-2" />
@@ -261,8 +261,20 @@ function AdminDashboardContent() {
                 Manage Clubs
               </Button>
             </Link>
+            <Link href="/admin/moderation">
+              <Button className="w-full bg-orange-600 hover:bg-orange-700">
+                <Shield className="w-4 h-4 mr-2" />
+                Moderation Queue
+              </Button>
+            </Link>
+            <Link href="/admin/reports">
+              <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                <AlertCircle className="w-4 h-4 mr-2" />
+                User Reports
+              </Button>
+            </Link>
             <Link href="/">
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full md:col-span-2 lg:col-span-1">
                 Back to Site
               </Button>
             </Link>
