@@ -48,7 +48,7 @@ export function VerifyEmailBanner() {
           initial={{ opacity: 0, y: -100 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -100 }}
-          className="fixed top-0 left-0 right-0 z-50"
+          className="fixed top-0 left-0 right-0 z-[100]"
         >
           <div className="bg-gradient-to-r from-yellow-600/90 to-orange-600/90 backdrop-blur-md border-b border-yellow-500/20">
             <div className="container mx-auto px-4 py-3">

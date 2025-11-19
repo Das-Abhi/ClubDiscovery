@@ -133,7 +133,7 @@ Dance Club,extracurricular,Express through dance,Dance club description,Dance cl
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm">
       <Card className="glass-card w-full max-w-3xl max-h-[90vh] overflow-y-auto m-4">
         <div className="p-6">
           {/* Header */}
