@@ -207,3 +207,28 @@ class GallerySettingsResponse(GallerySettingsBase):
 
     class Config:
         from_attributes = True
+
+
+class FavoriteBase(BaseModel):
+    """Base favorite schema"""
+
+    club_id: UUID
+
+
+class FavoriteCreate(FavoriteBase):
+    """Schema for creating a favorite"""
+
+    pass
+
+
+class FavoriteResponse(BaseModel):
+    """Schema for favorite response"""
+
+    id: UUID
+    user_id: UUID
+    club_id: UUID
+    created_at: datetime
+    club: Optional[ClubResponse] = None
+
+    class Config:
+        from_attributes = True

@@ -3,7 +3,7 @@ Initialize database tables
 Run this script to create all database tables
 """
 from app.database import engine, Base
-from app.models import User, Assessment, Recommendation, Club, Membership, Announcement, GallerySettings
+from app.models import User, Assessment, Recommendation, Club, Membership, Announcement, GallerySettings, Favorite
 
 
 def init_db():
@@ -16,6 +16,7 @@ def init_db():
     print("- Memberships table")
     print("- Announcements table")
     print("- Gallery Settings table")
+    print("- Favorites table")
 
     Base.metadata.create_all(bind=engine)
 
@@ -66,6 +67,7 @@ def init_db():
     print("  • memberships")
     print("  • announcements")
     print("  • gallery_settings")
+    print("  • favorites (Phase 6)")
     print("\n📝 Phase 3 features:")
     print("  - reset_password_token")
     print("  - reset_password_token_expires")
@@ -75,6 +77,9 @@ def init_db():
     print("  - PostgreSQL Full-Text Search (GIN index)")
     print("  - O(log n) search performance vs O(n) with ILIKE")
     print("  - Relevance ranking with ts_rank")
+    print("\n⭐ Phase 6 features:")
+    print("  - Favorites/bookmarking system")
+    print("  - User can favorite/bookmark clubs for quick access")
 
 
 if __name__ == "__main__":
