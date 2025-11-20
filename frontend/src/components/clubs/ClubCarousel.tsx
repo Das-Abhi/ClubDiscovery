@@ -22,18 +22,22 @@ export function ClubCarousel({
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [imageError, setImageError] = useState<Record<number, boolean>>({})
+  const [direction, setDirection] = useState<'left' | 'right'>('right')
 
   const goToNext = useCallback(() => {
+    setDirection('right')
     setCurrentIndex((prev) => (prev + 1) % clubs.length)
     setImageError({})
   }, [clubs.length])
 
   const goToPrevious = () => {
+    setDirection('left')
     setCurrentIndex((prev) => (prev - 1 + clubs.length) % clubs.length)
     setImageError({})
   }
 
   const goToSlide = (index: number) => {
+    setDirection(index > currentIndex ? 'right' : 'left')
     setCurrentIndex(index)
     setImageError({})
   }
@@ -63,10 +67,10 @@ export function ClubCarousel({
         <AnimatePresence mode="wait">
           <motion.div
             key={currentIndex}
-            initial={{ opacity: 0, x: 100 }}
+            initial={{ opacity: 0, x: direction === 'right' ? 100 : -100 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -100 }}
-            transition={{ duration: 0.5 }}
+            exit={{ opacity: 0, x: direction === 'right' ? -100 : 100 }}
+            transition={{ duration: 0.5, ease: 'easeInOut' }}
             className="absolute inset-0"
           >
             {/* Background Image */}
