@@ -20,7 +20,7 @@ export function Particles({ quantity = 50 }: { quantity?: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const particlesRef = useRef<Particle[]>([])
   const animationFrameRef = useRef<number>()
-  const mouseRef = useRef({ x: 0, y: 0, radius: 150 })
+  const mouseRef = useRef({ x: 0, y: 0, radius: 75 })
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -56,8 +56,8 @@ export function Particles({ quantity = 50 }: { quantity?: number }) {
         baseX: x,
         baseY: y,
         size: Math.random() * 5 + 2.5, // 2.5-7.5px (2.5x bigger)
-        speedX: (Math.random() - 0.5) * 0.1, // Much slower horizontal drift
-        speedY: -(Math.random() * 0.1 + 0.05), // Much slower upward movement
+        speedX: (Math.random() - 0.5) * 0.05, // Even slower horizontal drift
+        speedY: -(Math.random() * 0.05 + 0.03), // Even slower upward movement
         opacity: 0, // Start invisible for fade-in
         targetOpacity,
         age: 0,
@@ -85,18 +85,29 @@ export function Particles({ quantity = 50 }: { quantity?: number }) {
         particle.baseX += particle.speedX
         particle.baseY += particle.speedY
 
-        // Wrap around edges - bubbles respawn at bottom when they go off top
-        if (particle.baseX < 0) particle.baseX = canvas.width
-        if (particle.baseX > canvas.width) particle.baseX = 0
+        // Wrap around edges - update both base and actual positions to prevent "flying"
+        if (particle.baseX < 0) {
+          particle.baseX = canvas.width
+          particle.x = canvas.width
+        }
+        if (particle.baseX > canvas.width) {
+          particle.baseX = 0
+          particle.x = 0
+        }
         if (particle.baseY < 0) {
           // Respawn at bottom with random x position and reset for fade-in
           particle.baseY = canvas.height
           particle.baseX = Math.random() * canvas.width
+          particle.x = particle.baseX
+          particle.y = particle.baseY
           particle.age = 0
           particle.opacity = 0
           particle.targetOpacity = Math.random() * 0.3 + 0.2
         }
-        if (particle.baseY > canvas.height) particle.baseY = 0
+        if (particle.baseY > canvas.height) {
+          particle.baseY = 0
+          particle.y = 0
+        }
 
         // Mouse interaction
         const dx = mouseRef.current.x - particle.baseX
@@ -112,18 +123,18 @@ export function Particles({ quantity = 50 }: { quantity?: number }) {
         let glowIntensity = 0
 
         if (distance < mouseRef.current.radius) {
-          // Gentle repel particles away from mouse
-          const repelX = forceDirectionX * force * 10
-          const repelY = forceDirectionY * force * 10
+          // Very gentle repel particles away from mouse
+          const repelX = forceDirectionX * force * 5
+          const repelY = forceDirectionY * force * 5
           particle.x = particle.baseX - repelX
           particle.y = particle.baseY - repelY
 
-          // Calculate glow intensity based on proximity
-          glowIntensity = (1 - distance / maxDistance) * 10
+          // Calculate subtle glow intensity based on proximity
+          glowIntensity = (1 - distance / maxDistance) * 6
         } else {
           // Smoothly return to base position
-          particle.x += (particle.baseX - particle.x) * 0.05
-          particle.y += (particle.baseY - particle.y) * 0.05
+          particle.x += (particle.baseX - particle.x) * 0.08
+          particle.y += (particle.baseY - particle.y) * 0.08
         }
 
         // Draw particle with glow
