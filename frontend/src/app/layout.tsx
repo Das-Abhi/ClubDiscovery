@@ -14,8 +14,8 @@ export const metadata: Metadata = {
   authors: [{ name: 'ClubCompass Team' }],
   manifest: '/manifest.json',
   icons: {
-    icon: '/icon.svg',
-    apple: '/icon.svg',
+    icon: '/favicon-32x32.png',
+    apple: '/favicon-32x32.png',
   },
   openGraph: {
     title: 'ClubCompass - BMSCE Club Discovery',
