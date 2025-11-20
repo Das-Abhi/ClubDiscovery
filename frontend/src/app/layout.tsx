@@ -13,6 +13,10 @@ export const metadata: Metadata = {
   keywords: ['BMSCE', 'clubs', 'college', 'extracurricular', 'BMS College of Engineering'],
   authors: [{ name: 'ClubCompass Team' }],
   manifest: '/manifest.json',
+  icons: {
+    icon: '/icon.svg',
+    apple: '/icon.svg',
+  },
   openGraph: {
     title: 'ClubCompass - BMSCE Club Discovery',
     description: 'Discover and join clubs at BMS College of Engineering',
