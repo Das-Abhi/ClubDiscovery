@@ -117,7 +117,7 @@
     transition: all 0.3s ease;
   }
 
-  .glass-card:hover {
+  .glass-card:hover:not(header):not(footer) {
     background: rgba(0, 0, 0, 0.5);
     border-color: rgba(139, 0, 0, 0.5);
     transform: translateY(-4px);
