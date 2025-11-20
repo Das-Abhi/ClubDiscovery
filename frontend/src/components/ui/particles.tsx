@@ -52,10 +52,10 @@ export function Particles({ quantity = 50 }: { quantity?: number }) {
         y,
         baseX: x,
         baseY: y,
-        size: Math.random() * 2 + 0.5,
-        speedX: (Math.random() - 0.5) * 0.5,
-        speedY: (Math.random() - 0.5) * 0.5,
-        opacity: Math.random() * 0.5 + 0.2,
+        size: Math.random() * 3 + 1,
+        speedX: (Math.random() - 0.5) * 0.3,
+        speedY: -(Math.random() * 0.5 + 0.2), // Negative for upward movement
+        opacity: Math.random() * 0.4 + 0.3,
       }
     })
 
@@ -70,10 +70,14 @@ export function Particles({ quantity = 50 }: { quantity?: number }) {
         particle.baseX += particle.speedX
         particle.baseY += particle.speedY
 
-        // Wrap around edges
+        // Wrap around edges - bubbles respawn at bottom when they go off top
         if (particle.baseX < 0) particle.baseX = canvas.width
         if (particle.baseX > canvas.width) particle.baseX = 0
-        if (particle.baseY < 0) particle.baseY = canvas.height
+        if (particle.baseY < 0) {
+          // Respawn at bottom with random x position
+          particle.baseY = canvas.height
+          particle.baseX = Math.random() * canvas.width
+        }
         if (particle.baseY > canvas.height) particle.baseY = 0
 
         // Mouse interaction
@@ -83,9 +87,11 @@ export function Particles({ quantity = 50 }: { quantity?: number }) {
         const forceDirectionX = dx / distance
         const forceDirectionY = dy / distance
 
-        // Calculate repulsion force
+        // Calculate repulsion force and glow
         const maxDistance = mouseRef.current.radius
         const force = (maxDistance - distance) / maxDistance
+
+        let glowIntensity = 0
 
         if (distance < mouseRef.current.radius) {
           // Repel particles away from mouse
@@ -93,35 +99,32 @@ export function Particles({ quantity = 50 }: { quantity?: number }) {
           const repelY = forceDirectionY * force * 20
           particle.x = particle.baseX - repelX
           particle.y = particle.baseY - repelY
+
+          // Calculate glow intensity based on proximity
+          glowIntensity = (1 - distance / maxDistance) * 15
         } else {
           // Smoothly return to base position
           particle.x += (particle.baseX - particle.x) * 0.1
           particle.y += (particle.baseY - particle.y) * 0.1
         }
 
-        // Draw particle
+        // Draw particle with glow
         ctx.beginPath()
+
+        // Add glow effect when mouse is near
+        if (glowIntensity > 0) {
+          ctx.shadowBlur = glowIntensity
+          ctx.shadowColor = 'rgba(239, 68, 68, 0.8)'
+        } else {
+          ctx.shadowBlur = 0
+        }
+
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
         ctx.fillStyle = `rgba(239, 68, 68, ${particle.opacity})` // Red color
         ctx.fill()
-      })
 
-      // Draw connections
-      particlesRef.current.forEach((particle, i) => {
-        particlesRef.current.slice(i + 1).forEach((otherParticle) => {
-          const dx = particle.x - otherParticle.x
-          const dy = particle.y - otherParticle.y
-          const distance = Math.sqrt(dx * dx + dy * dy)
-
-          if (distance < 100) {
-            ctx.beginPath()
-            ctx.moveTo(particle.x, particle.y)
-            ctx.lineTo(otherParticle.x, otherParticle.y)
-            ctx.strokeStyle = `rgba(239, 68, 68, ${0.1 * (1 - distance / 100)})`
-            ctx.lineWidth = 0.5
-            ctx.stroke()
-          }
-        })
+        // Reset shadow for next particle
+        ctx.shadowBlur = 0
       })
 
       animationFrameRef.current = requestAnimationFrame(animate)
