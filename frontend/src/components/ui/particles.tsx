@@ -12,6 +12,8 @@ interface Particle {
   opacity: number
   baseX: number
   baseY: number
+  targetOpacity: number
+  age: number
 }
 
 export function Particles({ quantity = 50 }: { quantity?: number }) {
@@ -47,15 +49,18 @@ export function Particles({ quantity = 50 }: { quantity?: number }) {
     particlesRef.current = Array.from({ length: quantity }, () => {
       const x = Math.random() * canvas.width
       const y = Math.random() * canvas.height
+      const targetOpacity = Math.random() * 0.3 + 0.2
       return {
         x,
         y,
         baseX: x,
         baseY: y,
-        size: Math.random() * 3 + 1,
-        speedX: (Math.random() - 0.5) * 0.3,
-        speedY: -(Math.random() * 0.5 + 0.2), // Negative for upward movement
-        opacity: Math.random() * 0.4 + 0.3,
+        size: Math.random() * 2 + 1,
+        speedX: (Math.random() - 0.5) * 0.1, // Much slower horizontal drift
+        speedY: -(Math.random() * 0.1 + 0.05), // Much slower upward movement
+        opacity: 0, // Start invisible for fade-in
+        targetOpacity,
+        age: 0,
       }
     })
 
@@ -66,6 +71,16 @@ export function Particles({ quantity = 50 }: { quantity?: number }) {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
       particlesRef.current.forEach((particle) => {
+        // Increment age for fade-in effect
+        particle.age += 1
+
+        // Gradual fade-in over first 60 frames (~1 second at 60fps)
+        if (particle.age < 60) {
+          particle.opacity = (particle.age / 60) * particle.targetOpacity
+        } else {
+          particle.opacity = particle.targetOpacity
+        }
+
         // Update base position with drift
         particle.baseX += particle.speedX
         particle.baseY += particle.speedY
@@ -74,9 +89,12 @@ export function Particles({ quantity = 50 }: { quantity?: number }) {
         if (particle.baseX < 0) particle.baseX = canvas.width
         if (particle.baseX > canvas.width) particle.baseX = 0
         if (particle.baseY < 0) {
-          // Respawn at bottom with random x position
+          // Respawn at bottom with random x position and reset for fade-in
           particle.baseY = canvas.height
           particle.baseX = Math.random() * canvas.width
+          particle.age = 0
+          particle.opacity = 0
+          particle.targetOpacity = Math.random() * 0.3 + 0.2
         }
         if (particle.baseY > canvas.height) particle.baseY = 0
 
@@ -94,18 +112,18 @@ export function Particles({ quantity = 50 }: { quantity?: number }) {
         let glowIntensity = 0
 
         if (distance < mouseRef.current.radius) {
-          // Repel particles away from mouse
-          const repelX = forceDirectionX * force * 20
-          const repelY = forceDirectionY * force * 20
+          // Gentle repel particles away from mouse
+          const repelX = forceDirectionX * force * 10
+          const repelY = forceDirectionY * force * 10
           particle.x = particle.baseX - repelX
           particle.y = particle.baseY - repelY
 
           // Calculate glow intensity based on proximity
-          glowIntensity = (1 - distance / maxDistance) * 15
+          glowIntensity = (1 - distance / maxDistance) * 10
         } else {
           // Smoothly return to base position
-          particle.x += (particle.baseX - particle.x) * 0.1
-          particle.y += (particle.baseY - particle.y) * 0.1
+          particle.x += (particle.baseX - particle.x) * 0.05
+          particle.y += (particle.baseY - particle.y) * 0.05
         }
 
         // Draw particle with glow
