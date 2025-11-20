@@ -16,8 +16,8 @@ export function TypewriterEffect({ words, className = '' }: { words: string; cla
           opacity: 1,
         },
         {
-          duration: 0.05,
-          delay: stagger(0.05),
+          duration: 0.1,
+          delay: stagger(0.1),
         }
       )
     }
