@@ -55,7 +55,7 @@ export function Particles({ quantity = 50 }: { quantity?: number }) {
         y,
         baseX: x,
         baseY: y,
-        size: Math.random() * 2 + 1,
+        size: Math.random() * 5 + 2.5, // 2.5-7.5px (2.5x bigger)
         speedX: (Math.random() - 0.5) * 0.1, // Much slower horizontal drift
         speedY: -(Math.random() * 0.1 + 0.05), // Much slower upward movement
         opacity: 0, // Start invisible for fade-in
