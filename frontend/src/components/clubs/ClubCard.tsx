@@ -39,7 +39,6 @@ export function ClubCard({ club, onClick, index = 0, searchQuery }: ClubCardProp
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.1 }}
-      whileHover={{ y: -8, transition: { duration: 0.2 } }}
     >
       <Card
         className="glass-card cursor-pointer group overflow-hidden h-full"

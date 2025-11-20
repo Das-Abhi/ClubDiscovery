@@ -83,7 +83,7 @@ export default function HomePage() {
             <Link href="/assessment">
               <Button
                 size="lg"
-                className="px-8 py-6 bg-gradient-to-r from-red-900 to-red-700 hover:from-red-800 hover:to-red-600 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl text-base w-full sm:w-auto"
+                className="px-8 py-6 bg-gradient-to-r from-red-900 to-red-700 hover:from-red-800 hover:to-red-600 text-white font-semibold rounded-lg transition-all duration-300 hover:shadow-xl text-base w-full sm:w-auto"
               >
                 <Award className="mr-2 h-5 w-5" />
                 Take Assessment
@@ -154,7 +154,7 @@ export default function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           <Link
             href="/clubs/cocurricular"
-            className="glass-card p-8 text-center group hover:scale-105 transition-transform duration-300"
+            className="glass-card p-8 text-center group transition-transform duration-300"
           >
             <div className="text-4xl mb-4">💻</div>
             <h3 className="text-xl font-semibold mb-2 gradient-text">
@@ -170,7 +170,7 @@ export default function HomePage() {
 
           <Link
             href="/clubs/extracurricular"
-            className="glass-card p-8 text-center group hover:scale-105 transition-transform duration-300"
+            className="glass-card p-8 text-center group transition-transform duration-300"
           >
             <div className="text-4xl mb-4">🎭</div>
             <h3 className="text-xl font-semibold mb-2 gradient-text">
@@ -186,7 +186,7 @@ export default function HomePage() {
 
           <Link
             href="/clubs/department"
-            className="glass-card p-8 text-center group hover:scale-105 transition-transform duration-300"
+            className="glass-card p-8 text-center group transition-transform duration-300"
           >
             <div className="text-4xl mb-4">🏛️</div>
             <h3 className="text-xl font-semibold mb-2 gradient-text">
