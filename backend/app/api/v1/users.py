@@ -40,6 +40,7 @@ async def update_current_user_profile(
 
     - **full_name**: Updated full name
     - **email**: Updated email (must be BMSCE email)
+    - **usn**: University Student Number (e.g., 1BM22CS001)
 
     Returns updated user data
     """
@@ -53,6 +54,15 @@ async def update_current_user_profile(
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Email already in use"
+            )
+
+    # Check if USN is being changed and if it already exists
+    if "usn" in update_data and update_data["usn"] and update_data["usn"] != current_user.usn:
+        existing_usn = db.query(User).filter(User.usn == update_data["usn"]).first()
+        if existing_usn:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="USN already in use"
             )
 
     for field, value in update_data.items():

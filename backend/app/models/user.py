@@ -25,6 +25,10 @@ class User(Base):
     # User profile
     full_name = Column(String(255), nullable=False)
 
+    # University Student Number (USN) - Format: 1BM22CS001
+    # Nullable for backward compatibility with existing users
+    usn = Column(String(20), unique=True, nullable=True, index=True)
+
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)

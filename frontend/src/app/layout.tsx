@@ -5,6 +5,7 @@ import { Footer } from '@/components/layout/Footer'
 import { VerifyEmailBanner } from '@/components/auth/VerifyEmailBanner'
 import { ToastProvider } from '@/components/providers/toast-provider'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
+import { AuthProvider } from '@/components/auth/AuthProvider'
 import { Analytics } from '@vercel/analytics/react'
 
 export const metadata: Metadata = {
@@ -45,15 +46,17 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body>
         <ErrorBoundary>
-          <VerifyEmailBanner />
-          <div className="min-h-screen relative flex flex-col">
-            <Header />
-            <main className="flex-1 pt-16">
-              {children}
-            </main>
-            <Footer />
-          </div>
-          <ToastProvider />
+          <AuthProvider>
+            <VerifyEmailBanner />
+            <div className="min-h-screen relative flex flex-col">
+              <Header />
+              <main className="flex-1 pt-16">
+                {children}
+              </main>
+              <Footer />
+            </div>
+            <ToastProvider />
+          </AuthProvider>
         </ErrorBoundary>
         <Analytics />
       </body>

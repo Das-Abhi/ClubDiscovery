@@ -43,11 +43,21 @@ class AuthService:
                 detail="User with this email already exists",
             )
 
+        # Check if USN is already in use (if provided)
+        if user_data.usn:
+            existing_usn = db.query(User).filter(User.usn == user_data.usn.upper()).first()
+            if existing_usn:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="User with this USN already exists",
+                )
+
         # Create new user
         db_user = User(
             email=user_data.email.lower(),
             password_hash=get_password_hash(user_data.password),
             full_name=user_data.full_name,
+            usn=user_data.usn.upper() if user_data.usn else None,
         )
 
         db.add(db_user)

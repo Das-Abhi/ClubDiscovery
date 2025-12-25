@@ -7,6 +7,7 @@ import type { User } from '@/lib/types/user'
 export interface UserUpdateData {
   full_name?: string
   email?: string
+  usn?: string  // University Student Number (e.g., 1BM22CS001)
 }
 
 export const usersApi = {

@@ -33,7 +33,7 @@ export function Header() {
   const handleLogout = () => {
     logout()
     setIsProfileOpen(false)
-    router.push('/')
+    router.push('/auth')
   }
 
   return (

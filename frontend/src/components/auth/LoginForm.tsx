@@ -4,7 +4,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -12,6 +12,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { CompassTransition } from '@/components/ui/compass-transition'
 import { useAuth } from '@/lib/hooks/useAuth'
 
 // Validation schema
@@ -27,9 +28,11 @@ type LoginFormData = z.infer<typeof loginSchema>
 
 export function LoginForm() {
   const router = useRouter()
-  const { login } = useAuth()
+  const searchParams = useSearchParams()
+  const { login, user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showTransition, setShowTransition] = useState(false)
 
   const {
     register,
@@ -45,20 +48,33 @@ export function LoginForm() {
 
     try {
       await login(data)
-      // Redirect to home page on successful login
-      router.push('/')
+      // Show the compass transition (user will be available in state)
+      setShowTransition(true)
     } catch (err: any) {
       setError(err.message || 'Login failed. Please check your credentials.')
-    } finally {
       setIsLoading(false)
     }
   }
 
+  const handleTransitionComplete = () => {
+    // Redirect to return URL or home page after transition
+    const returnUrl = searchParams.get('returnUrl') || '/'
+    router.push(returnUrl)
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      {/* Email Field */}
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+    <>
+      {/* Compass Transition Animation */}
+      <CompassTransition
+        isVisible={showTransition}
+        userName={user?.full_name}
+        onComplete={handleTransitionComplete}
+      />
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Email Field */}
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
         <Input
           id="email"
           type="email"
@@ -103,15 +119,16 @@ export function LoginForm() {
         </div>
       )}
 
-      {/* Submit Button */}
-      <Button
-        type="submit"
-        className="w-full"
-        disabled={isLoading}
-        variant="glass"
-      >
-        {isLoading ? 'Logging in...' : 'Login'}
-      </Button>
-    </form>
+        {/* Submit Button */}
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isLoading}
+          variant="glass"
+        >
+          {isLoading ? 'Logging in...' : 'Login'}
+        </Button>
+      </form>
+    </>
   )
 }

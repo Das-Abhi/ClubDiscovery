@@ -11,12 +11,24 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { CompassTransition } from '@/components/ui/compass-transition'
 import { useAuth } from '@/lib/hooks/useAuth'
+
+// USN format: 1BM22CS001 (Year-BM-YY-Department-Roll)
+const USN_PATTERN = /^[1-4]BM[0-9]{2}[A-Z]{2}[0-9]{3}$/
 
 // Validation schema with password strength requirements
 const signupSchema = z
   .object({
     full_name: z.string().min(1, 'Full name is required'),
+    usn: z
+      .string()
+      .transform((val) => val.toUpperCase().trim())
+      .refine((val) => val === '' || USN_PATTERN.test(val), {
+        message: 'USN must be in format: 1BM22CS001',
+      })
+      .optional()
+      .or(z.literal('')),
     email: z
       .string()
       .email('Invalid email address')
@@ -50,10 +62,12 @@ const getPasswordStrength = (password: string): number => {
 
 export function SignupForm() {
   const router = useRouter()
-  const { register: registerUser } = useAuth()
+  const { register: registerUser, user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [passwordStrength, setPasswordStrength] = useState(0)
+  const [showTransition, setShowTransition] = useState(false)
+  const [localUserName, setLocalUserName] = useState<string | undefined>()
 
   const {
     register,
@@ -80,14 +94,21 @@ export function SignupForm() {
         email: data.email,
         password: data.password,
         full_name: data.full_name,
+        usn: data.usn && data.usn !== '' ? data.usn : undefined,
       })
-      // Redirect to home page on successful registration
-      router.push('/')
+      // Store the form's name as fallback for transition
+      setLocalUserName(data.full_name)
+      // Show the compass transition
+      setShowTransition(true)
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.')
-    } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleTransitionComplete = () => {
+    // Redirect to home page after transition
+    router.push('/')
   }
 
   const strengthColors = [
@@ -102,12 +123,20 @@ export function SignupForm() {
   const strengthLabels = ['', 'Very Weak', 'Weak', 'Fair', 'Good', 'Strong']
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      {/* Full Name Field */}
-      <div className="space-y-2">
-        <Label htmlFor="full_name">Full Name</Label>
-        <Input
-          id="full_name"
+    <>
+      {/* Compass Transition Animation */}
+      <CompassTransition
+        isVisible={showTransition}
+        userName={user?.full_name || localUserName}
+        onComplete={handleTransitionComplete}
+      />
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Full Name Field */}
+        <div className="space-y-2">
+          <Label htmlFor="full_name">Full Name</Label>
+          <Input
+            id="full_name"
           type="text"
           placeholder="John Doe"
           {...register('full_name')}
@@ -117,6 +146,27 @@ export function SignupForm() {
         {errors.full_name && (
           <p className="text-sm text-red-500">{errors.full_name.message}</p>
         )}
+      </div>
+
+      {/* USN Field */}
+      <div className="space-y-2">
+        <Label htmlFor="usn">
+          USN <span className="text-gray-500 text-xs">(Optional)</span>
+        </Label>
+        <Input
+          id="usn"
+          type="text"
+          placeholder="1BM22CS001"
+          {...register('usn')}
+          className={errors.usn ? 'border-red-500' : ''}
+          disabled={isLoading}
+        />
+        {errors.usn && (
+          <p className="text-sm text-red-500">{errors.usn.message}</p>
+        )}
+        <p className="text-xs text-gray-500">
+          Format: 1BM22CS001 (Year-BM-YY-Department-Roll)
+        </p>
       </div>
 
       {/* Email Field */}
@@ -206,16 +256,17 @@ export function SignupForm() {
         {isLoading ? 'Creating account...' : 'Create Account'}
       </Button>
 
-      {/* Password Requirements */}
-      <div className="text-xs text-gray-400 space-y-1">
-        <p>Password must contain:</p>
-        <ul className="list-disc list-inside space-y-1">
-          <li>At least 8 characters</li>
-          <li>One uppercase letter</li>
-          <li>One lowercase letter</li>
-          <li>One digit</li>
-        </ul>
-      </div>
-    </form>
+        {/* Password Requirements */}
+        <div className="text-xs text-gray-400 space-y-1">
+          <p>Password must contain:</p>
+          <ul className="list-disc list-inside space-y-1">
+            <li>At least 8 characters</li>
+            <li>One uppercase letter</li>
+            <li>One lowercase letter</li>
+            <li>One digit</li>
+          </ul>
+        </div>
+      </form>
+    </>
   )
 }

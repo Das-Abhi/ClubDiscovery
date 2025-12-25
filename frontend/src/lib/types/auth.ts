@@ -9,6 +9,7 @@ export interface RegisterRequest {
   email: string
   password: string
   full_name: string
+  usn?: string  // University Student Number (e.g., 1BM22CS001)
 }
 
 export interface AuthResponse {

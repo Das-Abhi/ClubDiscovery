@@ -1,10 +1,14 @@
 """
 User Pydantic schemas for request/response validation
 """
+import re
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
 from pydantic import BaseModel, EmailStr, Field, field_validator, field_serializer
+
+# USN format: 1BM22CS001 (Year-BM-YY-Department-Roll)
+USN_PATTERN = r'^[1-4]BM[0-9]{2}[A-Z]{2}[0-9]{3}$'
 
 
 class UserBase(BaseModel):
@@ -12,6 +16,7 @@ class UserBase(BaseModel):
 
     email: EmailStr
     full_name: str = Field(..., min_length=1, max_length=255)
+    usn: Optional[str] = Field(None, max_length=20, description="University Student Number (e.g., 1BM22CS001)")
 
 
 class UserCreate(UserBase):
@@ -41,6 +46,19 @@ class UserCreate(UserBase):
             raise ValueError("Password must contain at least one digit")
         return v
 
+    @field_validator("usn")
+    @classmethod
+    def validate_usn(cls, v: Optional[str]) -> Optional[str]:
+        """Validate BMSCE USN format (e.g., 1BM22CS001)"""
+        if v is None or v == "":
+            return None
+        v = v.upper().strip()
+        if not re.match(USN_PATTERN, v):
+            raise ValueError(
+                "USN must be in format: 1BM22CS001 (Year-BM-YY-Department-Roll)"
+            )
+        return v
+
 
 class UserLogin(BaseModel):
     """Schema for user login"""
@@ -68,6 +86,7 @@ class UserUpdate(BaseModel):
 
     full_name: Optional[str] = Field(None, min_length=1, max_length=255)
     email: Optional[EmailStr] = None
+    usn: Optional[str] = Field(None, max_length=20, description="University Student Number (e.g., 1BM22CS001)")
 
     @field_validator("email")
     @classmethod
@@ -76,6 +95,19 @@ class UserUpdate(BaseModel):
         if v and not v.lower().endswith("@bmsce.ac.in"):
             raise ValueError("Email must be a valid BMSCE email address (@bmsce.ac.in)")
         return v.lower() if v else None
+
+    @field_validator("usn")
+    @classmethod
+    def validate_usn(cls, v: Optional[str]) -> Optional[str]:
+        """Validate BMSCE USN format (e.g., 1BM22CS001)"""
+        if v is None or v == "":
+            return None
+        v = v.upper().strip()
+        if not re.match(USN_PATTERN, v):
+            raise ValueError(
+                "USN must be in format: 1BM22CS001 (Year-BM-YY-Department-Roll)"
+            )
+        return v
 
 
 class TokenResponse(BaseModel):

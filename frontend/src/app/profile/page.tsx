@@ -62,7 +62,7 @@ function ProfileContent() {
 
   const handleLogout = () => {
     logout()
-    router.push('/')
+    router.push('/auth')
   }
 
   if (isLoading || !user) {
@@ -153,6 +153,14 @@ function ProfileContent() {
                         }`}
                       />
                       {user.is_active ? 'Active' : 'Inactive'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400">USN</p>
+                    <p className="text-white font-medium">
+                      {user.usn || (
+                        <span className="text-gray-500 italic">Not provided</span>
+                      )}
                     </p>
                   </div>
                 </div>

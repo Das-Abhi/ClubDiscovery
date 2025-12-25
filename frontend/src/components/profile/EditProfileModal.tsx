@@ -20,9 +20,13 @@ interface EditProfileModalProps {
   onSuccess: (updatedUser: User) => void
 }
 
+// USN format: 1BM22CS001 (Year-BM-YY-Department-Roll)
+const USN_PATTERN = /^[1-4]BM[0-9]{2}[A-Z]{2}[0-9]{3}$/
+
 export function EditProfileModal({ isOpen, onClose, user, onSuccess }: EditProfileModalProps) {
   const { loadUser } = useAuth()
   const [fullName, setFullName] = useState(user.full_name)
+  const [usn, setUsn] = useState(user.usn || '')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -35,11 +39,19 @@ export function EditProfileModal({ isOpen, onClose, user, onSuccess }: EditProfi
       return
     }
 
+    // Validate USN format if provided
+    const trimmedUsn = usn.trim().toUpperCase()
+    if (trimmedUsn && !USN_PATTERN.test(trimmedUsn)) {
+      setError('USN must be in format: 1BM22CS001')
+      return
+    }
+
     setIsLoading(true)
 
     try {
       const updatedUser = await usersApi.updateProfile({
         full_name: fullName.trim(),
+        usn: trimmedUsn || undefined,
       })
 
       // Reload user data in auth store
@@ -113,6 +125,22 @@ export function EditProfileModal({ isOpen, onClose, user, onSuccess }: EditProfi
                     disabled={isLoading}
                     className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="usn">USN (University Student Number)</Label>
+                  <Input
+                    id="usn"
+                    type="text"
+                    placeholder="1BM22CS001"
+                    value={usn}
+                    onChange={(e) => setUsn(e.target.value.toUpperCase())}
+                    disabled={isLoading}
+                    className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Format: 1BM22CS001 (Year-BM-YY-Department-Roll)
+                  </p>
                 </div>
 
                 <div className="space-y-2">
